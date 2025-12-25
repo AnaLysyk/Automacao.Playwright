@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "playwright test",
+    "test:e2e": "playwright test tests/e2e",
+    "test:api": "playwright test tests/api"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Analysyk/desafio-automacao-playwright.git"
@@ -11,7 +15,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/Analysyk/desafio-automacao-playwright/issues"
   },
