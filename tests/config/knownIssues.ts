@@ -7,9 +7,9 @@ export type KnownIssue = {
 export const knownIssues = {
   postoTopTowerAeroporto: {
     id: 'KNOWN-POSTO-001',
-    title: 'Divergencia Top Tower / Aeroporto',
+    title: 'Divergência Top Tower / Aeroporto',
     message:
-      'Aeroporto visivel apos selecao de Top Tower. Divergencia conhecida de configuracao/tipo de posto no banco. Nao bloquear E2E principal.',
+      'Aeroporto visível após seleção de Top Tower. Divergência conhecida de configuração/tipo de posto no banco. Não bloquear E2E principal.',
   },
 } satisfies Record<string, KnownIssue>;
 

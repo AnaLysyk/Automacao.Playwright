@@ -7,6 +7,9 @@ import {
   birthDateOver16,
   birthDateUnder16,
 } from '../support/dates/birthDateFactory';
+import { cidadaoSmartTestData } from '../support/data/cidadaoSmartTestData';
+
+const dadosPessoa = cidadaoSmartTestData.requerenteDemo;
 
 async function chegarDataHora(localPage: CidadaoSmartAgendamentoLocalPage): Promise<void> {
   await localPage.acessar();
@@ -27,9 +30,9 @@ test.describe('Cidadao Smart - Validacoes agendamento presencial', () => {
 
     await dataHoraPage.preencherNome('Ana');
     await dataHoraPage.preencherDataNascimento('01/01/2009');
-    await dataHoraPage.preencherEmail('ana.testing.company@gmail.com');
+    await dataHoraPage.preencherEmail(dadosPessoa.email);
     await dataHoraPage.preencherCpf('');
-    await dataHoraPage.preencherTelefone('55555555555');
+    await dataHoraPage.preencherTelefone(dadosPessoa.telefoneSemMascara);
     await dataHoraPage.prosseguir();
 
     await dataHoraPage.validarMensagemNomeSobrenome();
@@ -41,11 +44,11 @@ test.describe('Cidadao Smart - Validacoes agendamento presencial', () => {
 
     await chegarDataHora(localPage);
 
-    await dataHoraPage.preencherNome('Ana Teste Automacao');
+    await dataHoraPage.preencherNome(dadosPessoa.nome);
     await dataHoraPage.preencherDataNascimento('01/01/2009');
-    await dataHoraPage.preencherEmail('ana.testing.company@gmail.com');
+    await dataHoraPage.preencherEmail(dadosPessoa.email);
     await dataHoraPage.preencherCpf('');
-    await dataHoraPage.preencherTelefone('55555555555');
+    await dataHoraPage.preencherTelefone(dadosPessoa.telefoneSemMascara);
     await dataHoraPage.selecionarData('18/05/2026');
     await dataHoraPage.selecionarHorarioAgendado('08:00');
     await dataHoraPage.prosseguir();
@@ -59,10 +62,10 @@ test.describe('Cidadao Smart - Validacoes agendamento presencial', () => {
 
     await chegarDataHora(localPage);
 
-    await dataHoraPage.preencherNome('Ana Teste Automacao');
+    await dataHoraPage.preencherNome(dadosPessoa.nome);
     await dataHoraPage.preencherDataNascimento('01/01/2009');
-    await dataHoraPage.preencherEmail('ana.testing.company@gmail.com');
-    await dataHoraPage.preencherCpf('03659184829');
+    await dataHoraPage.preencherEmail(dadosPessoa.email);
+    await dataHoraPage.preencherCpf(dadosPessoa.cpfSemMascara);
     await dataHoraPage.preencherTelefone('');
     await dataHoraPage.prosseguir();
 
@@ -75,11 +78,11 @@ test.describe('Cidadao Smart - Validacoes agendamento presencial', () => {
 
     await chegarDataHora(localPage);
 
-    await dataHoraPage.preencherNome('Ana Teste Automacao');
+    await dataHoraPage.preencherNome(dadosPessoa.nome);
     await dataHoraPage.preencherDataNascimento(birthDateUnder16());
-    await dataHoraPage.preencherEmail('ana.testing.company@gmail.com');
-    await dataHoraPage.preencherCpf('03659184829');
-    await dataHoraPage.preencherTelefone('55555555555');
+    await dataHoraPage.preencherEmail(dadosPessoa.email);
+    await dataHoraPage.preencherCpf(dadosPessoa.cpfSemMascara);
+    await dataHoraPage.preencherTelefone(dadosPessoa.telefoneSemMascara);
     await dataHoraPage.prosseguir();
 
     await dataHoraPage.validarErroMenorIdade();
@@ -91,11 +94,11 @@ test.describe('Cidadao Smart - Validacoes agendamento presencial', () => {
 
     await chegarDataHora(localPage);
 
-    await dataHoraPage.preencherNome('Ana Teste Automacao');
+    await dataHoraPage.preencherNome(dadosPessoa.nome);
     await dataHoraPage.preencherDataNascimento(birthDateExactly16());
-    await dataHoraPage.preencherEmail('ana.testing.company@gmail.com');
-    await dataHoraPage.preencherCpf('03659184829');
-    await dataHoraPage.preencherTelefone('55555555555');
+    await dataHoraPage.preencherEmail(dadosPessoa.email);
+    await dataHoraPage.preencherCpf(dadosPessoa.cpfSemMascara);
+    await dataHoraPage.preencherTelefone(dadosPessoa.telefoneSemMascara);
     await dataHoraPage.prosseguir();
   });
 
@@ -105,11 +108,11 @@ test.describe('Cidadao Smart - Validacoes agendamento presencial', () => {
 
     await chegarDataHora(localPage);
 
-    await dataHoraPage.preencherNome('Ana Teste Automacao');
+    await dataHoraPage.preencherNome(dadosPessoa.nome);
     await dataHoraPage.preencherDataNascimento(birthDateOver16());
-    await dataHoraPage.preencherEmail('ana.testing.company@gmail.com');
-    await dataHoraPage.preencherCpf('03659184829');
-    await dataHoraPage.preencherTelefone('55555555555');
+    await dataHoraPage.preencherEmail(dadosPessoa.email);
+    await dataHoraPage.preencherCpf(dadosPessoa.cpfSemMascara);
+    await dataHoraPage.preencherTelefone(dadosPessoa.telefoneSemMascara);
     await dataHoraPage.selecionarData('18/05/2026');
     await dataHoraPage.selecionarHorarioAgendado('08:00');
     await dataHoraPage.prosseguir();
@@ -123,11 +126,11 @@ test.describe('Cidadao Smart - Validacoes agendamento presencial', () => {
 
     await chegarDataHora(localPage);
 
-    await dataHoraPage.preencherNome('Ana Teste Automacao');
+    await dataHoraPage.preencherNome(dadosPessoa.nome);
     await dataHoraPage.preencherDataNascimento(birthDateFuture());
-    await dataHoraPage.preencherEmail('ana.testing.company@gmail.com');
-    await dataHoraPage.preencherCpf('03659184829');
-    await dataHoraPage.preencherTelefone('55555555555');
+    await dataHoraPage.preencherEmail(dadosPessoa.email);
+    await dataHoraPage.preencherCpf(dadosPessoa.cpfSemMascara);
+    await dataHoraPage.preencherTelefone(dadosPessoa.telefoneSemMascara);
     await dataHoraPage.prosseguir();
 
     await dataHoraPage.validarErroDataInvalida();

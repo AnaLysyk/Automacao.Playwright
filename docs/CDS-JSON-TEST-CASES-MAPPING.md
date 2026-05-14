@@ -112,13 +112,13 @@ Casos mencionados na especificação mas NÃO encontrados no JSON:
 
 ## 6. NOTAS DE IMPLEMENTAÇÃO
 
-### Data Reutilizável
+### Massa Reutilizável
 ```typescript
 // Em support/data/cidadaoSmartMass.ts
-elegivel2ViaExpressa: CPF 03659187763 (ILHZMV HLZIVH ERVRIZ, 1974-01-24)
-elegivel2ViaComAlteracoes: CPF 06834801707 (OFXRVMV WZ XLMXVRXZL, 1976-12-08)
-menorDe16Anos: CPF 13036174630 (2013-05-16) ← BLOQUEADO
-ineligivel: CPF 00979771447 (status RFB = cancelado) ← BLOQUEADO
+elegivel2ViaExpressa: CIDADAO_SMART_2VIA_EXPRESSA_CPF
+elegivel2ViaComAlteracoes: CIDADAO_SMART_2VIA_ALTERACOES_CPF
+menorDe16Anos: CIDADAO_SMART_MENOR_16_CPF
+ineligivel: CIDADAO_SMART_INELEGIVEL_CPF
 ```
 
 ### Padrão de Teste

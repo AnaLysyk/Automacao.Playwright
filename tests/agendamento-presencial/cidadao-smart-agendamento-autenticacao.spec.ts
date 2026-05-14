@@ -3,6 +3,7 @@ import { CidadaoSmartAgendamentoAutenticacaoPage } from '../pages/CidadaoSmartAg
 import { CidadaoSmartAgendamentoDataHoraPage } from '../pages/CidadaoSmartAgendamentoDataHoraPage';
 import { CidadaoSmartAgendamentoLocalPage } from '../pages/CidadaoSmartAgendamentoLocalPage';
 import { CidadaoSmartAgendamentoResumoPage } from '../pages/CidadaoSmartAgendamentoResumoPage';
+import { cidadaoSmartTestData } from '../support/data/cidadaoSmartTestData';
 
 test.describe('Cidadao Smart - Autenticacao', () => {
   test('deve validar codigo de seguranca e seguir para confirmacao', async ({ page }) => {
@@ -12,6 +13,8 @@ test.describe('Cidadao Smart - Autenticacao', () => {
     const autenticacaoPage = new CidadaoSmartAgendamentoAutenticacaoPage(page);
 
     const codigoSeguranca = process.env.CIDADAO_SMART_SECURITY_CODE;
+    const dadosPessoa = cidadaoSmartTestData.requerenteDemo;
+    const dadosAgendamento = cidadaoSmartTestData.agendamentoDemo;
     test.skip(!codigoSeguranca, 'Defina CIDADAO_SMART_SECURITY_CODE para executar autenticacao.');
 
     await localPage.acessar();
@@ -21,13 +24,13 @@ test.describe('Cidadao Smart - Autenticacao', () => {
     await localPage.resolverCaptchaManual();
     await localPage.prosseguir();
 
-    await dataHoraPage.preencherNome('Ana Teste Automacao');
-    await dataHoraPage.preencherDataNascimento('01/01/2009');
-    await dataHoraPage.preencherEmail('ana.testing.company@gmail.com');
-    await dataHoraPage.preencherCpf('03659184829');
-    await dataHoraPage.preencherTelefone('55555555555');
-    await dataHoraPage.selecionarData('18/05/2026');
-    await dataHoraPage.selecionarHorarioAgendado('08:00');
+    await dataHoraPage.preencherNome(dadosPessoa.nome);
+    await dataHoraPage.preencherDataNascimento(dadosPessoa.dataNascimento);
+    await dataHoraPage.preencherEmail(dadosPessoa.email);
+    await dataHoraPage.preencherCpf(dadosPessoa.cpfSemMascara);
+    await dataHoraPage.preencherTelefone(dadosPessoa.telefoneSemMascara);
+    await dataHoraPage.selecionarData(dadosAgendamento.dataAgendamento);
+    await dataHoraPage.selecionarHorarioAgendado(dadosAgendamento.horario);
     await dataHoraPage.prosseguir();
 
     await resumoPage.prosseguir();

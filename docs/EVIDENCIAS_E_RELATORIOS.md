@@ -145,7 +145,7 @@ Após aberto, navegar por:
 
 - Consolida status de execução e evidências.
 - Deve apontar se a falha é produto, ambiente, massa ou automação.
-- Deve referenciar o documento de `docs/GUIA_ANALISE_FALHAS.md` quando a causa não for clara.
+- Deve referenciar o documento de `docs/GUIA_DE_ANALISE_DE_FALHAS.md` quando a causa não for clara.
 
 ### 7.2 Relatório de bug
 
@@ -170,6 +170,6 @@ Após aberto, navegar por:
 ## 9. Referências
 
 - `docs/GUIA_DE_EXECUCAO.md`
-- `docs/MAPA_TESTES.md`
+- `docs/MAPA_DE_TESTES.md`
 - `context/requirements/booking-admin.md`
 - `context/requirements/ambientes-e-acessos.md`

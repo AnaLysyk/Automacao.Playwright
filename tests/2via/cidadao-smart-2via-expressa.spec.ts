@@ -165,7 +165,7 @@ test.describe("Cidadão Smart - 2ª Via Expressa", () => {
       await dataHoraPage.preencherNome(requerente.nome);
       await dataHoraPage.preencherDataNascimento(requerente.dataNascimento);
       await dataHoraPage.preencherEmail("menor@example.com");
-      await dataHoraPage.preencherTelefone("55555555555");
+      await dataHoraPage.preencherTelefone(cidadaoSmartTestMass.menorDe16Anos.telefone || "");
 
       // Esperar mensagem de rejeição
       await expect(
@@ -187,7 +187,7 @@ test.describe("Cidadão Smart - 2ª Via Expressa", () => {
       await dataHoraPage.preencherDataNascimento(requerente.dataNascimento);
       await dataHoraPage.preencherEmail("cancelado@example.com");
       await dataHoraPage.preencherCpf(requerente.cpf);
-      await dataHoraPage.preencherTelefone("55555555555");
+      await dataHoraPage.preencherTelefone(cidadaoSmartTestMass.ineligivel.telefone || "");
 
       // Esperar mensagem de rejeição
       await expect(

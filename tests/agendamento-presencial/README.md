@@ -76,7 +76,7 @@ Dados usados nos testes:
 {
   nome: "João Silva",
   dataNascimento: "15/03/1990",
-  cpf: "12345678901",
+  cpf: process.env.CIDADAO_SMART_TEST_CPF,
   telefone: "(48) 99999-9999",
   email: "joao@test.com"
 }

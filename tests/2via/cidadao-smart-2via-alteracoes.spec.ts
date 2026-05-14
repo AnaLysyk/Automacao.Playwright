@@ -260,7 +260,7 @@ test.describe("Cidadão Smart - 2ª Via com Alterações (Conferência de Docume
     });
 
     await test.step("Buscar processo por CPF", async () => {
-      await page.fill("[name=cpf]", "03659187763");
+      await page.fill("[name=cpf]", cidadaoSmartTestMass.elegivel2ViaExpressa.cpf);
       await page.click("button:has-text('Rastrear')");
     });
 

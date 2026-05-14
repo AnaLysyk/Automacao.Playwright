@@ -145,14 +145,14 @@ npm run test:cidadao -- --debug
 ### Email de Teste
 
 ```
-CIDADAO_SMART_TEST_EMAIL=ana.testing.company@gmail.com
+CIDADAO_SMART_TEST_EMAIL=qa-booking@example.com
 ```
 
 **IMAP Configuration** (para extrair código automaticamente):
 
 ```
 CIDADAO_SMART_EMAIL_IMAP_HOST=imap.gmail.com
-CIDADAO_SMART_EMAIL_IMAP_USER=ana.testing.company@gmail.com
+CIDADAO_SMART_EMAIL_IMAP_USER=qa-booking@example.com
 CIDADAO_SMART_EMAIL_IMAP_PASSWORD=[app-password]
 ```
 
