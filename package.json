@@ -1,27 +1,50 @@
 {
-  "name": "desafio-automacao-playwright",
+  "name": "cidadao-smart-playwright",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
     "test": "playwright test",
-    "test:e2e": "playwright test tests/e2e",
-    "test:api": "playwright test tests/api"
+    "test:list": "playwright test --list",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    
+    "test:smoke": "playwright test tests/smoke --headed --project=chromium",
+    "test:regressao": "playwright test tests/agendamento-presencial tests/emissao-online tests/consulta tests/2via tests/api --headed --project=chromium",
+    "test:e2e": "playwright test tests/e2e --headed --project=chromium",
+    "test:demo": "playwright test tests/manual-assisted --headed --project=chromium",
+    "test:booking:assistido": "playwright test tests/booking/manual-assisted/booking-agendamento-assistido.spec.ts --headed --project=chromium",
+    "test:booking:debug": "playwright test tests/booking/manual-assisted/booking-agendamento-assistido.spec.ts --debug --project=chromium",
+    "test:booking:public": "playwright test tests/booking/public --headed --project=chromium",
+    "test:booking:e2e": "playwright test tests/booking/e2e --headed --project=chromium",
+    "test:admin:readonly": "playwright test tests/booking-admin/read-only --headed --project=chromium",
+    "test:admin:write": "playwright test tests/booking-admin/write --headed --project=chromium",
+    "test:api:booking": "playwright test tests/api/booking --project=chromium",
+    "test:api": "playwright test tests/api --headed --project=chromium",
+    
+    "test:all": "playwright test tests/smoke tests/agendamento-presencial tests/emissao-online tests/consulta tests/2via tests/api tests/e2e --project=chromium",
+    "test:ci": "playwright test tests/smoke tests/agendamento-presencial tests/emissao-online tests/consulta tests/2via tests/api --project=chromium",
+    
+    "test:agendamento": "playwright test tests/agendamento-presencial --headed --project=chromium",
+    "test:agendamento:local": "playwright test tests/agendamento-presencial --grep '@local' --headed --project=chromium",
+    "test:agendamento:data-hora": "playwright test tests/agendamento-presencial --grep '@data-hora' --headed --project=chromium",
+    "test:agendamento:validacoes": "playwright test tests/agendamento-presencial --grep '@validacao' --headed --project=chromium",
+    
+    "test:emissao": "playwright test tests/emissao-online --headed --project=chromium",
+    "test:consulta": "playwright test tests/consulta --headed --project=chromium",
+    "test:2via": "playwright test tests/2via --headed --project=chromium",
+    
+    "test:grep": "playwright test --grep",
+    
+    "report": "playwright show-report",
+    "report:testing-company": "tsx tests/support/reports/gerarRelatorioTestingCompany.ts",
+    "report:griaule": "tsx tests/support/reports/gerarRelatorioGriaule.ts"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Analysyk/desafio-automacao-playwright.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "bugs": {
-    "url": "https://github.com/Analysyk/desafio-automacao-playwright/issues"
-  },
-  "homepage": "https://github.com/Analysyk/desafio-automacao-playwright#readme",
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
-    "@types/node": "^25.0.3"
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^25.7.0",
+    "dotenv": "^16.6.1",
+    "imapflow": "^1.3.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
   }
 }
