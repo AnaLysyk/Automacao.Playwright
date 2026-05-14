@@ -6,11 +6,18 @@ import { CidadaoSmartAgendamentoResumoPage } from "../pages/CidadaoSmartAgendame
 import { CidadaoSmartAgendamentoAutenticacaoPage } from "../pages/CidadaoSmartAgendamentoAutenticacaoPage";
 import { CidadaoSmartAgendamentoConfirmacaoPage } from "../pages/CidadaoSmartAgendamentoConfirmacaoPage";
 import { handleCaptcha } from "../support/captcha/handleCaptcha";
-import { chegarNaTelaDataHora, chegarNaTelaResumo } from "../support/flows/cidadaoSmartFlows";
+import { chegarNaTelaDataHora, prosseguirOuBloquearPorCaptcha } from "../support/flows/cidadaoSmartFlows";
+
+function exigirCpfFinalizado(cpf: string | undefined): void {
+  test.skip(
+    !cpf,
+    "Defina CIDADAO_SMART_2VIA_FINALIZADA_CPF ou CIDADAO_SMART_2VIA_EXPRESSA_CPF com CPF que tenha CIN finalizada."
+  );
+}
 
 test.describe("Cidadão Smart - 2ª Via Expressa", () => {
   test.beforeEach(async ({ page }) => {
-    test.step("Pausar no CAPTCHA manual para resolução", async () => {
+    await test.step("Pausar no CAPTCHA manual para resolução", async () => {
       console.log("ℹ️  Configure CAPTCHA_MODE=disabled para rodar sem pausa");
     });
   });
@@ -23,6 +30,7 @@ test.describe("Cidadão Smart - 2ª Via Expressa", () => {
       cpf: cidadaoSmartTestMass.elegivel2ViaExpressa.cpf,
       telefone: cidadaoSmartTestMass.elegivel2ViaExpressa.telefone,
     };
+    exigirCpfFinalizado(requerente.cpf);
 
     await test.step("1. Acessar tela de Local", async () => {
       const localPage = new CidadaoSmartAgendamentoLocalPage(page);
@@ -48,7 +56,7 @@ test.describe("Cidadão Smart - 2ª Via Expressa", () => {
 
     await test.step("5. Prosseguir para Data e Hora", async () => {
       const localPage = new CidadaoSmartAgendamentoLocalPage(page);
-      await localPage.prosseguir();
+      await prosseguirOuBloquearPorCaptcha(localPage);
     });
 
     await test.step("6. Preencher dados do requerente", async () => {
@@ -157,7 +165,7 @@ test.describe("Cidadão Smart - 2ª Via Expressa", () => {
       await localPage.selecionarCidade("Florianópolis");
       await localPage.selecionarPosto("PCI - FLORIANÓPOLIS - Top Tower");
       await handleCaptcha(page);
-      await localPage.prosseguir();
+      await prosseguirOuBloquearPorCaptcha(localPage);
     });
 
     await test.step("Tentar preencher dados de menor", async () => {

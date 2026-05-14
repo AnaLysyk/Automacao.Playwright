@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { CidadaoSmartHomePageSelectors as S } from './selectors/CidadaoSmartHomePageSelectors';
+import { CidadaoSmartHomePageSelectors as S } from './selectors/CidadaoSmartHomePageSelectors.ts';
 
 export class CidadaoSmartHomePage {
   constructor(private readonly page: Page) {}

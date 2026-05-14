@@ -24,6 +24,8 @@
     "test:regressao": "playwright test tests/agendamento-presencial tests/emissao-online tests/consulta tests/2via tests/api --headed --project=chromium",
     "test:e2e": "playwright test tests/e2e --headed --project=chromium",
     "test:demo": "playwright test tests/manual-assisted --headed --project=chromium",
+    "test:captura:poc": "playwright test tests/poc/captura-fake-video.spec.ts --headed --project=chromium",
+    "media:fake-video": "tsx scripts/gerarFakeVideoCaptura.ts",
     "test:agendamento": "playwright test tests/agendamento-presencial --headed --project=chromium",
     "test:agendamento:local": "playwright test tests/agendamento-presencial --grep '@local' --headed --project=chromium",
     "test:agendamento:data-hora": "playwright test tests/agendamento-presencial --grep '@data-hora' --headed --project=chromium",

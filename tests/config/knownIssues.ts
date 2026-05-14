@@ -4,6 +4,7 @@ export type KnownIssue = {
   message: string;
 };
 
+// Eu mantenho known issues centralizados para o teste registrar warning sem espalhar texto pelo código.
 export const knownIssues = {
   postoTopTowerAeroporto: {
     id: 'KNOWN-POSTO-001',
@@ -12,4 +13,3 @@ export const knownIssues = {
       'Aeroporto visível após seleção de Top Tower. Divergência conhecida de configuração/tipo de posto no banco. Não bloquear E2E principal.',
   },
 } satisfies Record<string, KnownIssue>;
-

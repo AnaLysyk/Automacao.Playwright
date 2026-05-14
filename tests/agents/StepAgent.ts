@@ -11,6 +11,7 @@ function pad(value: number): string {
   return String(value).padStart(2, '0');
 }
 
+// Eu normalizo qualquer erro para texto legível no log e no resumo.
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error || '');
 }
@@ -22,6 +23,9 @@ export class StepAgent {
     private readonly failureClassifier: FailureClassifierAgent
   ) {}
 
+  /**
+   * Eu executo uma etapa rastreável: logo início/fim, gero evidência e classifico falha.
+   */
   async executar<T>(name: string, action: () => Promise<T>, options: StepOptions = {}): Promise<T> {
     const id = this.context.steps.length + 1;
     const step: StepRecord = {

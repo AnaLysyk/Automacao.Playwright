@@ -15,24 +15,30 @@ export type BookingAgendamentoData = {
   permitirPrimeiroHorarioDisponivel: boolean;
 };
 
-const getFutureDate = (daysAhead = 5): string => {
+// Eu calculo uma data futura para a massa demo não depender de uma data fixa vencida.
+function getFutureDate(daysAhead = 5): string {
   const date = new Date();
   date.setDate(date.getDate() + daysAhead);
+
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-};
 
-const readBoolean = (name: string, fallback: boolean): boolean => {
+  return `${day}/${month}/${year}`;
+}
+
+// Eu leio booleanos da massa permitindo trocar estratégia sem alterar código.
+function readBoolean(name: string, fallback: boolean): boolean {
   const raw = process.env[name];
   if (!raw) return fallback;
-  return raw.trim().toLowerCase() === 'true';
-};
 
+  return raw.trim().toLowerCase() === 'true';
+}
+
+// Eu concentro a massa demo do Booking para o agente usar sempre uma fonte única.
 export const bookingAgendamentoData: BookingAgendamentoData = {
-  cidade: process.env.CIDADAO_SMART_DEFAULT_CITY || 'Florianopolis',
-  postoPreferido: process.env.CIDADAO_SMART_DEFAULT_SERVICE_POINT || 'PCI - FLORIANOPOLIS - Top Tower',
+  cidade: process.env.CIDADAO_SMART_DEFAULT_CITY || 'Florianópolis',
+  postoPreferido: process.env.CIDADAO_SMART_DEFAULT_SERVICE_POINT || 'PCI - FLORIANÓPOLIS - Top Tower',
   postoPreferidoId: process.env.CIDADAO_SMART_DEFAULT_SERVICE_POINT_ID || 'top-tower',
   nome: process.env.CIDADAO_SMART_TEST_NAME || 'Automacao Assistida',
   cpf: process.env.CIDADAO_SMART_TEST_CPF || '',
@@ -44,4 +50,3 @@ export const bookingAgendamentoData: BookingAgendamentoData = {
   permitirPrimeiraDataDisponivel: readBoolean('BOOKING_ALLOW_FIRST_AVAILABLE_DATE', true),
   permitirPrimeiroHorarioDisponivel: readBoolean('BOOKING_ALLOW_FIRST_AVAILABLE_TIME', true),
 };
-

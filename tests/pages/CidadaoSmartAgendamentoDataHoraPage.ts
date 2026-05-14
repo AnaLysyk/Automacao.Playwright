@@ -1,5 +1,5 @@
 import { expect, Page } from '@playwright/test';
-import { CidadaoSmartAgendamentoDataHoraPageSelectors as S } from './selectors/CidadaoSmartAgendamentoDataHoraPageSelectors';
+import { CidadaoSmartAgendamentoDataHoraPageSelectors as S } from './selectors/CidadaoSmartAgendamentoDataHoraPageSelectors.ts';
 
 /**
  * Eu concentro aqui tudo que a tela Data e Hora sabe fazer:

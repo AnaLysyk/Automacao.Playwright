@@ -205,12 +205,42 @@ tests/booking/manual-assisted/
 tests/manual-assisted/
 ```
 
+## Captura com Câmera / Fake Video
+
+Captura por câmera não é CAPTCHA.
+
+Regras obrigatórias:
+
+- CAPTCHA real continua proibido de burlar.
+- Captura pode usar `CAPTURE_MODE=fake-video` quando tecnicamente possível e em ambiente controlado.
+- Usar `CAPTURE_MODE=manual` quando a pessoa precisar realizar a captura.
+- Usar `CAPTURE_MODE=disabled` somente quando houver suporte oficial de QA.
+- Imagem estática de rosto pode servir como origem, mas deve ser convertida para `.y4m` antes da POC.
+- Não versionar imagem ou vídeo sensível ou com pessoa real sem aprovação.
+- Criar POC antes de integrar captura fake ao fluxo real.
+- Se Capturing estiver instável no ambiente 146, classificar como falha de ambiente/integração quando aplicável.
+
+Variáveis esperadas:
+
+```env
+CAPTURE_MODE=manual
+CAMERA_FAKE_IMAGE_PATH=
+CAMERA_FAKE_VIDEO_PATH=
+CAMERA_FAKE_VIDEO_SECONDS=5
+CAMERA_FAKE_VIDEO_SIZE=640x480
+```
+
 ## Código de Segurança por E-mail
 
 Não automatizar UI do Gmail.
 
 Estratégias permitidas:
 
+- `EMAIL_CODE_MODE=manual`: preenchimento manual na tela;
+- `EMAIL_CODE_MODE=env`: código lido de `CIDADAO_SMART_SECURITY_CODE`;
+- `EMAIL_CODE_MODE=gmail-api`: Gmail API/OAuth com caixa de teste;
+- `EMAIL_CODE_MODE=internal-api`: endpoint interno de QA;
+- `EMAIL_CODE_MODE=log`: leitura autorizada de logs;
 - `CIDADAO_SMART_SECURITY_CODE` em `.env.local`;
 - preenchimento manual na tela;
 - Gmail API/OAuth em evolução futura;

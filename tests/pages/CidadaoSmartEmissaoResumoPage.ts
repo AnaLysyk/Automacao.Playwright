@@ -1,5 +1,5 @@
 import { expect, Page } from '@playwright/test';
-import { CidadaoSmartEmissaoResumoPageSelectors as S } from './selectors/CidadaoSmartEmissaoResumoPageSelectors';
+import { CidadaoSmartEmissaoResumoPageSelectors as S } from './selectors/CidadaoSmartEmissaoResumoPageSelectors.ts';
 import { ServicePoint, cidadaoSmartServicePoints } from '../support/data/cidadaoSmartServicePoints';
 
 export class CidadaoSmartEmissaoResumoPage {

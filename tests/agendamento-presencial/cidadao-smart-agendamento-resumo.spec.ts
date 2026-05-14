@@ -3,6 +3,7 @@ import { CidadaoSmartAgendamentoDataHoraPage } from '../pages/CidadaoSmartAgenda
 import { CidadaoSmartAgendamentoLocalPage } from '../pages/CidadaoSmartAgendamentoLocalPage';
 import { CidadaoSmartAgendamentoResumoPage } from '../pages/CidadaoSmartAgendamentoResumoPage';
 import { cidadaoSmartTestData } from '../support/data/cidadaoSmartTestData';
+import { prosseguirOuBloquearPorCaptcha } from '../support/flows/cidadaoSmartFlows';
 
 test.describe('Cidadao Smart - Resumo do agendamento', () => {
   test('deve exibir dados completos do resumo para Top Tower', async ({ page }) => {
@@ -32,7 +33,7 @@ test.describe('Cidadao Smart - Resumo do agendamento', () => {
     await localPage.selecionarCidade(dados.cidade);
     await localPage.selecionarPosto(dados.posto);
     await localPage.resolverCaptchaManual();
-    await localPage.prosseguir();
+    await prosseguirOuBloquearPorCaptcha(localPage);
 
     await dataHoraPage.preencherNome(dados.nome);
     await dataHoraPage.preencherDataNascimento(dados.dataNascimento);
