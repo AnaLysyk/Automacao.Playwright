@@ -1,4 +1,23 @@
-import { Page } from "@playwright/test";
+import { Page, test } from "@playwright/test";
+
+export async function prosseguirOuBloquearPorCaptcha(
+  localPage: { prosseguir(): Promise<void> }
+): Promise<void> {
+  try {
+    await localPage.prosseguir();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const captchaDisabled = process.env.CAPTCHA_MODE === "disabled";
+    const prosseguirBloqueado = /toBeEnabled|disabled|Prosseguir/i.test(message);
+
+    test.skip(
+      captchaDisabled && prosseguirBloqueado,
+      "Cenario bloqueado: CAPTCHA real continua ativo no ambiente. CAPTCHA_MODE=disabled exige bypass oficial de QA."
+    );
+
+    throw error;
+  }
+}
 
 /**
  * Helper para fluxo reutilizável: chegar na tela Data e Hora.
@@ -23,7 +42,7 @@ export async function chegarNaTelaDataHora(
   await localPage.selecionarCidade(cidade);
   await localPage.selecionarPosto(posto);
   await handleCaptcha(page);
-  await localPage.prosseguir();
+  await prosseguirOuBloquearPorCaptcha(localPage);
 }
 
 /**

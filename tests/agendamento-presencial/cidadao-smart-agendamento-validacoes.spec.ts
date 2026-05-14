@@ -8,6 +8,7 @@ import {
   birthDateUnder16,
 } from '../support/dates/birthDateFactory';
 import { cidadaoSmartTestData } from '../support/data/cidadaoSmartTestData';
+import { prosseguirOuBloquearPorCaptcha } from '../support/flows/cidadaoSmartFlows';
 
 const dadosPessoa = cidadaoSmartTestData.requerenteDemo;
 
@@ -18,7 +19,7 @@ async function chegarDataHora(localPage: CidadaoSmartAgendamentoLocalPage): Prom
   await localPage.selecionarCidade('Florianópolis');
   await localPage.selecionarPosto('PCI - FLORIANÓPOLIS - Top Tower');
   await localPage.resolverCaptchaManual();
-  await localPage.prosseguir();
+  await prosseguirOuBloquearPorCaptcha(localPage);
 }
 
 test.describe('Cidadao Smart - Validacoes agendamento presencial', () => {

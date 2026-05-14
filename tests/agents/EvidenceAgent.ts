@@ -15,6 +15,7 @@ function pad(value: number): string {
   return String(value).padStart(2, '0');
 }
 
+// Eu gero o nome da pasta por timestamp para cada execução ter evidências isoladas.
 function timestampForDir(date = new Date()): string {
   return [
     date.getFullYear(),
@@ -23,6 +24,7 @@ function timestampForDir(date = new Date()): string {
   ].join('-') + `_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`;
 }
 
+// Eu limpo nomes de etapa para criar arquivos legíveis e seguros no Windows.
 function sanitizeFileName(name: string): string {
   return name
     .normalize('NFD')
@@ -40,6 +42,9 @@ export class EvidenceAgent {
     private readonly context: ExecutionContext
   ) {}
 
+  /**
+   * Eu inicio a pasta da execução e já registro a primeira evidência do fluxo.
+   */
   async start(): Promise<void> {
     this.targetDir = path.join(this.context.env.evidenceDir, 'booking', 'manual-assisted', timestampForDir());
     this.context.evidenceDir = this.targetDir;
@@ -47,6 +52,9 @@ export class EvidenceAgent {
     await this.capture('00-inicio', { description: 'Inicio do fluxo assistido', status: 'parcial' });
   }
 
+  /**
+   * Eu tiro screenshot, registro URL/timestamp e atualizo o resumo Markdown da execução.
+   */
   async capture(name: string, metadata: EvidenceMetadata = {}): Promise<void> {
     if (!this.targetDir) {
       throw new Error('EvidenceAgent deve ser iniciado com start() antes de capturar evidencias.');
@@ -78,16 +86,23 @@ export class EvidenceAgent {
     await this.writeSummary();
   }
 
+  /**
+   * Eu marco o fim da execução e reescrevo o resumo final.
+   */
   async finish(): Promise<void> {
     if (!this.targetDir) return;
     this.context.finishedAt = new Date().toISOString();
     await this.writeSummary();
   }
 
+  /**
+   * Eu exponho a pasta final para logs e mensagens de encerramento.
+   */
   getOutputDir(): string | null {
     return this.targetDir;
   }
 
+  // Eu protejo a captura de URL para não quebrar a evidência se a página fechar.
   private safePageUrl(): string {
     try {
       return this.page.url();
@@ -96,12 +111,14 @@ export class EvidenceAgent {
     }
   }
 
+  // Eu mantenho um resumo simples em Markdown para anexar em ticket, daily ou evidência.
   private async writeSummary(): Promise<void> {
     if (!this.targetDir) return;
 
     const knownIssuePosto = this.context.knownIssues.some((issue) => issue.id === 'KNOWN-POSTO-001') ? 'sim' : 'nao';
     const codigoStatus = this.context.emailCodeStatus || 'pendente';
     const captchaStatus = this.context.captchaStatus || this.context.env.captchaMode;
+    const captureStatus = this.context.captureStatus || this.context.env.captureMode;
 
     const lines = [
       '# Resumo da Execucao - Booking Agendamento Assistido',
@@ -111,6 +128,7 @@ export class EvidenceAgent {
       `Tipo: ${this.context.env.executionMode}`,
       `Status: ${this.context.status}`,
       `CAPTCHA: ${captchaStatus}`,
+      `Captura: ${captureStatus}`,
       `Codigo de seguranca: ${codigoStatus}`,
       `Inicio: ${this.context.startedAt}`,
       `Fim: ${this.context.finishedAt || 'em andamento'}`,

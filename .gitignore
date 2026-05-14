@@ -10,3 +10,14 @@ debug.log
 .DS_Store
 dist/
 coverage/
+
+# Midia local usada em POCs de captura. Nao versionar rostos, videos ou massa sensivel.
+fixtures/media/source/*
+!fixtures/media/source/.gitkeep
+fixtures/media/*.y4m
+fixtures/media/*.mp4
+fixtures/media/*.png
+fixtures/media/*.jpg
+fixtures/media/*.jpeg
+fixtures/media/*.webp
+!fixtures/media/.gitkeep

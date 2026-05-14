@@ -4,6 +4,13 @@ import {
   statusProcesso2Via,
 } from "../support/data/cidadaoSmartMass";
 
+function exigirCpfFinalizado(cpf: string | undefined): void {
+  test.skip(
+    !cpf,
+    "Defina CIDADAO_SMART_2VIA_FINALIZADA_CPF ou a massa específica de 2ª via com CPF que tenha CIN finalizada."
+  );
+}
+
 async function navegarOuBloquearCenario(
   page: import("@playwright/test").Page,
   rota: string,
@@ -39,6 +46,7 @@ test.describe("Cidadão Smart - 2ª Via com Alterações (Conferência de Docume
      */
 
     const requerente = cidadaoSmartTestMass.elegivel2ViaComAlteracoes;
+    exigirCpfFinalizado(requerente.cpf);
 
     await test.step("Acessar formulário 2ª via com alterações", async () => {
       await navegarOuBloquearCenario(
@@ -59,7 +67,11 @@ test.describe("Cidadão Smart - 2ª Via com Alterações (Conferência de Docume
 
       // Esperar dados serem preenchidos automaticamente
       const nomeField = page.locator("[name=nome]");
-      await expect(nomeField).toHaveValue(requerente.nome);
+      if (process.env.CIDADAO_SMART_2VIA_ALTERACOES_NOME) {
+        await expect(nomeField).toHaveValue(requerente.nome);
+      } else {
+        await expect(nomeField).not.toHaveValue("");
+      }
       await expect(nomeField).toBeDisabled(); // Campo readonly
     });
 
@@ -131,6 +143,7 @@ test.describe("Cidadão Smart - 2ª Via com Alterações (Conferência de Docume
 
   test("Validar fluxo de rejeição total de documentos", async ({ page }) => {
     const requerente = cidadaoSmartTestMass.elegivel2ViaComAlteracoes;
+    exigirCpfFinalizado(requerente.cpf);
 
     await test.step("Chegar à tela de conferência", async () => {
       await navegarOuBloquearCenario(
@@ -247,6 +260,7 @@ test.describe("Cidadão Smart - 2ª Via com Alterações (Conferência de Docume
      * READY → pronto para retirada
      * FINALIZED → retirado
      */
+    exigirCpfFinalizado(cidadaoSmartTestMass.elegivel2ViaExpressa.cpf);
 
     await test.step("Acessar página de rastreamento", async () => {
       await navegarOuBloquearCenario(

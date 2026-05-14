@@ -1,15 +1,19 @@
 const env = (key: string, fallback = ''): string => process.env[key] || fallback;
+const cpfComCinFinalizada = env('CIDADAO_SMART_2VIA_FINALIZADA_CPF');
+const nomePadrao = env('CIDADAO_SMART_TEST_NAME', 'Pessoa Teste Automacao');
+const nascimentoPadrao = env('CIDADAO_SMART_2VIA_FINALIZADA_NASCIMENTO', env('CIDADAO_SMART_TEST_BIRTH_DATE', '01/01/1990'));
+const telefonePadrao = env('CIDADAO_SMART_TEST_PHONE_RAW', '55555555555');
 
 // Massas reais/controladas devem ficar no .env.local da máquina.
 // Este arquivo mantém apenas placeholders seguros para o repositório.
 export const cidadaoSmartTestMass = {
   elegivel2ViaExpressa: {
-    cpf: env('CIDADAO_SMART_2VIA_EXPRESSA_CPF'),
-    nome: env('CIDADAO_SMART_2VIA_EXPRESSA_NOME', 'Pessoa Teste 2 Via Expressa'),
+    cpf: env('CIDADAO_SMART_2VIA_EXPRESSA_CPF', cpfComCinFinalizada),
+    nome: env('CIDADAO_SMART_2VIA_EXPRESSA_NOME', nomePadrao),
     nomeMae: env('CIDADAO_SMART_2VIA_EXPRESSA_NOME_MAE', 'Mae Teste 2 Via Expressa'),
-    dataNascimento: env('CIDADAO_SMART_2VIA_EXPRESSA_NASCIMENTO'),
+    dataNascimento: env('CIDADAO_SMART_2VIA_EXPRESSA_NASCIMENTO', nascimentoPadrao),
     sexo: env('CIDADAO_SMART_2VIA_EXPRESSA_SEXO', '2'),
-    telefone: env('CIDADAO_SMART_2VIA_EXPRESSA_TELEFONE', '+55 (11) 99999-9999'),
+    telefone: env('CIDADAO_SMART_2VIA_EXPRESSA_TELEFONE', telefonePadrao),
     email: env('CIDADAO_SMART_2VIA_EXPRESSA_EMAIL', 'qa-2via-expressa@example.com'),
     endereco: env('CIDADAO_SMART_2VIA_EXPRESSA_ENDERECO', 'Endereco Teste'),
     numero: env('CIDADAO_SMART_2VIA_EXPRESSA_NUMERO', '1'),
@@ -21,12 +25,12 @@ export const cidadaoSmartTestMass = {
   },
 
   elegivel2ViaComAlteracoes: {
-    cpf: env('CIDADAO_SMART_2VIA_ALTERACOES_CPF'),
-    nome: env('CIDADAO_SMART_2VIA_ALTERACOES_NOME', 'Pessoa Teste 2 Via Alteracoes'),
+    cpf: env('CIDADAO_SMART_2VIA_ALTERACOES_CPF', cpfComCinFinalizada),
+    nome: env('CIDADAO_SMART_2VIA_ALTERACOES_NOME', nomePadrao),
     nomeMae: env('CIDADAO_SMART_2VIA_ALTERACOES_NOME_MAE', 'Mae Teste 2 Via Alteracoes'),
-    dataNascimento: env('CIDADAO_SMART_2VIA_ALTERACOES_NASCIMENTO'),
+    dataNascimento: env('CIDADAO_SMART_2VIA_ALTERACOES_NASCIMENTO', nascimentoPadrao),
     sexo: env('CIDADAO_SMART_2VIA_ALTERACOES_SEXO', '9'),
-    telefone: env('CIDADAO_SMART_2VIA_ALTERACOES_TELEFONE', '+55 (11) 98888-8888'),
+    telefone: env('CIDADAO_SMART_2VIA_ALTERACOES_TELEFONE', telefonePadrao),
     email: env('CIDADAO_SMART_2VIA_ALTERACOES_EMAIL', 'qa-2via-alteracoes@example.com'),
     endereco: env('CIDADAO_SMART_2VIA_ALTERACOES_ENDERECO', 'Endereco Teste'),
     numero: env('CIDADAO_SMART_2VIA_ALTERACOES_NUMERO', '2'),

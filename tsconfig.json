@@ -3,6 +3,7 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions": true,
     "types": ["node", "@playwright/test"],
     "lib": ["ES2022"],
     "esModuleInterop": true,
@@ -14,6 +15,7 @@
   },
   "include": [
     "playwright.config.ts",
-    "tests/**/*.ts"
+    "tests/**/*.ts",
+    "scripts/**/*.ts"
   ]
 }

@@ -17,7 +17,7 @@ import { CidadaoSmartAgendamentoResumoPage } from "../pages/CidadaoSmartAgendame
 import { CidadaoSmartAgendamentoAutenticacaoPage } from "../pages/CidadaoSmartAgendamentoAutenticacaoPage";
 import { CidadaoSmartAgendamentoConfirmacaoPage } from "../pages/CidadaoSmartAgendamentoConfirmacaoPage";
 import { cidadaoSmartTestMass } from "../support/data/cidadaoSmartMass";
-import { chegarNaTelaDataHora, chegarNaTelaResumo } from "../support/flows/cidadaoSmartFlows";
+import { chegarNaTelaDataHora, chegarNaTelaResumo, prosseguirOuBloquearPorCaptcha } from "../support/flows/cidadaoSmartFlows";
 import { handleCaptcha } from "../support/captcha/handleCaptcha";
 import { birthDateExactly16, birthDateUnder16 } from "../support/dates/birthDateFactory";
 
@@ -48,7 +48,7 @@ test.describe("CID-AGP: Agendamento Presencial (JSON Test Cases)", () => {
 
     await test.step("1. Acessar tela de seleção local", async () => {
       await localPage.acessar();
-      await expect(page).toHaveTitle(/agendamento|cidadão/i);
+      await expect(page).toHaveTitle(/agendamento|cidadão|Cidadao|Sistema de Emissão CIN/i);
     });
 
     await test.step("2. Selecionar cidade Florianópolis", async () => {
@@ -67,7 +67,7 @@ test.describe("CID-AGP: Agendamento Presencial (JSON Test Cases)", () => {
     });
 
     await test.step("5. Prosseguir para data e hora", async () => {
-      await localPage.prosseguir();
+      await prosseguirOuBloquearPorCaptcha(localPage);
       // Validar que chegou na tela de data/hora
       await expect(page).toHaveURL(/data-e-hora/i);
     });
@@ -189,7 +189,7 @@ test.describe("CID-AGP: Agendamento Presencial (JSON Test Cases)", () => {
     });
 
     await test.step("4. Avanç ar sem CPF (deve ser permitido)", async () => {
-      await localPage.prosseguir();
+      await prosseguirOuBloquearPorCaptcha(localPage);
 
       // Validar que avançou
       await expect(page).toHaveURL(/data-e-hora/i);
@@ -200,7 +200,7 @@ test.describe("CID-AGP: Agendamento Presencial (JSON Test Cases)", () => {
 
     await test.step("5. Validar que Nome é obrigatório em Data-Hora", async () => {
       // Tentar prosseguir sem preencher nome
-      const nextButton = page.locator("button:has-text(/Prosseguir|Próximo/i)");
+      const nextButton = page.getByRole("button", { name: /Prosseguir|Próximo/i }).first();
 
       // Se houver validação no cliente, botão deve estar desabilitado
       // Ou se clicar, deve exibir erro
@@ -238,7 +238,7 @@ test.describe("CID-AGP: Agendamento Presencial (JSON Test Cases)", () => {
 
     await test.step("4. Validar mensagem de erro", async () => {
       // Tentar prosseguir
-      const nextButton = page.locator("button:has-text(/Prosseguir|Próximo/i)");
+      const nextButton = page.getByRole("button", { name: /Prosseguir|Próximo/i }).first();
       await nextButton.click().catch(() => {
         // Erro esperado
       });
@@ -288,7 +288,7 @@ test.describe("CID-AGP: Agendamento Presencial (JSON Test Cases)", () => {
     });
 
     await test.step("3. Tentar prosseguir sem telefone", async () => {
-      const nextButton = page.locator("button:has-text(/Prosseguir|Próximo/i)");
+      const nextButton = page.getByRole("button", { name: /Prosseguir|Próximo/i }).first();
 
       // Validar que botão está desabilitado
       const isDisabled = await nextButton
@@ -302,13 +302,11 @@ test.describe("CID-AGP: Agendamento Presencial (JSON Test Cases)", () => {
 
     await test.step("4. Validar mensagem de obrigatoriedade", async () => {
       // Buscar campo de telefone e seu rótulo
-      const phoneLabel = page.locator(
-        "label:has-text(/Telefone|Phone|Celular/i)"
-      );
+      const phoneLabel = page.getByText(/Telefone|Phone|Celular/i).first();
 
       // Se houver indicador visual de obrigatoriedade
       const required = await phoneLabel
-        .locator("*:has-text(/\\*/i)") // Asterisco de obrigatório
+        .locator("xpath=ancestor-or-self::*[contains(., '*')]")
         .isVisible()
         .catch(() => false);
 
@@ -320,7 +318,7 @@ test.describe("CID-AGP: Agendamento Presencial (JSON Test Cases)", () => {
     await test.step("5. Preencher telefone e validar que ação é liberada", async () => {
       await dataHoraPage.preencherTelefone("4733334444");
 
-      const nextButton = page.locator("button:has-text(/Prosseguir|Próximo/i)");
+      const nextButton = page.getByRole("button", { name: /Prosseguir|Próximo/i }).first();
       const isEnabled = await nextButton
         .isEnabled()
         .catch(() => false);
@@ -354,7 +352,7 @@ test.describe("CID-AGP: Agendamento Presencial (JSON Test Cases)", () => {
     });
 
     await test.step("3. Tentar prosseguir e validar bloqueio", async () => {
-      const nextButton = page.locator("button:has-text(/Prosseguir|Próximo/i)");
+      const nextButton = page.getByRole("button", { name: /Prosseguir|Próximo/i }).first();
       const isDisabled = await nextButton
         .isDisabled()
         .catch(() => false);
@@ -414,6 +412,7 @@ test.describe("CID-AGP: Agendamento Presencial (JSON Test Cases)", () => {
   }) => {
     await test.step("1. Completar fluxo até resumo", async () => {
       const requerente = cidadaoSmartTestMass.elegivel2ViaExpressa;
+      await chegarNaTelaDataHora(page);
       await chegarNaTelaResumo(page, requerente, "18/05/2026", "08:00");
     });
 

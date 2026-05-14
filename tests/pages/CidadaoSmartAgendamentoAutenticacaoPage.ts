@@ -1,5 +1,5 @@
 import { expect, Page } from '@playwright/test';
-import { CidadaoSmartAgendamentoAutenticacaoPageSelectors as S } from './selectors/CidadaoSmartAgendamentoAutenticacaoPageSelectors';
+import { CidadaoSmartAgendamentoAutenticacaoPageSelectors as S } from './selectors/CidadaoSmartAgendamentoAutenticacaoPageSelectors.ts';
 
 export class CidadaoSmartAgendamentoAutenticacaoPage {
   constructor(private readonly page: Page) {}

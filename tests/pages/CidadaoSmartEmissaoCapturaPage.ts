@@ -1,6 +1,6 @@
 import path from 'path';
 import { expect, Page } from '@playwright/test';
-import { CidadaoSmartEmissaoCapturaPageSelectors as S } from './selectors/CidadaoSmartEmissaoCapturaPageSelectors';
+import { CidadaoSmartEmissaoCapturaPageSelectors as S } from './selectors/CidadaoSmartEmissaoCapturaPageSelectors.ts';
 
 export class CidadaoSmartEmissaoCapturaPage {
   constructor(private readonly page: Page) {}

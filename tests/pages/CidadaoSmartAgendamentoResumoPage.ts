@@ -1,5 +1,5 @@
 import { expect, Page } from '@playwright/test';
-import { CidadaoSmartAgendamentoResumoPageSelectors as S } from './selectors/CidadaoSmartAgendamentoResumoPageSelectors';
+import { CidadaoSmartAgendamentoResumoPageSelectors as S } from './selectors/CidadaoSmartAgendamentoResumoPageSelectors.ts';
 import { ServicePoint, cidadaoSmartServicePoints } from '../support/data/cidadaoSmartServicePoints';
 
 export type DadosResumoAgendamento = {

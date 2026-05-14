@@ -7,6 +7,7 @@ import { CidadaoSmartAgendamentoResumoPage } from '../pages/CidadaoSmartAgendame
 import { cidadaoSmartTestData } from '../support/data/cidadaoSmartTestData';
 import { getServicePointForTest } from '../support/data/getServicePointForTest';
 import { obterCodigoSegurancaParaAutenticacao } from '../support/email/obterCodigoSeguranca';
+import { prosseguirOuBloquearPorCaptcha } from '../support/flows/cidadaoSmartFlows';
 import { salvarProtocoloGerado } from '../support/reports/protocolos';
 
 test.describe('Cidadao Smart - Agendamento presencial', () => {
@@ -45,7 +46,7 @@ test.describe('Cidadao Smart - Agendamento presencial', () => {
     await localPage.selecionarPosto(selectedServicePoint.nome);
 
     await localPage.resolverCaptchaManual();
-    await localPage.prosseguir();
+    await prosseguirOuBloquearPorCaptcha(localPage);
 
     await dataHoraPage.validarTelaDataHora();
     await dataHoraPage.preencherNome(dados.nome);

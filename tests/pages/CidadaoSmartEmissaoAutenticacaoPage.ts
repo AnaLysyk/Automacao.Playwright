@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { CidadaoSmartEmissaoAutenticacaoPageSelectors as S } from './selectors/CidadaoSmartEmissaoAutenticacaoPageSelectors';
+import { CidadaoSmartEmissaoAutenticacaoPageSelectors as S } from './selectors/CidadaoSmartEmissaoAutenticacaoPageSelectors.ts';
 
 export class CidadaoSmartEmissaoAutenticacaoPage {
   constructor(private readonly page: Page) {}
@@ -38,7 +38,14 @@ export class CidadaoSmartEmissaoAutenticacaoPage {
   }
 
   async prosseguir(): Promise<void> {
-    await this.page.getByRole('button', { name: S.botaoProsseguir }).click();
+    const botaoProsseguir = this.page.getByRole('button', { name: S.botaoProsseguir }).first();
+    await expect(botaoProsseguir).toBeVisible();
+
+    if (!(await botaoProsseguir.isEnabled())) {
+      throw new Error('CAPTCHA_BLOQUEANDO_EMISSAO_AUTENTICACAO');
+    }
+
+    await botaoProsseguir.click();
   }
 
   async validarErrosObrigatorios(): Promise<void> {
@@ -67,7 +74,10 @@ export class CidadaoSmartEmissaoAutenticacaoPage {
     const byPlaceholder = this.page.getByPlaceholder(S.campoDataNascimento);
     if ((await byPlaceholder.count()) > 0) return byPlaceholder.first();
 
-    const byName = this.page.locator('input[name*="nascimento" i], input[id*="nascimento" i], input[name*="data" i], input[type="date"]');
+    const byDatePlaceholder = this.page.getByPlaceholder(/DD\/MM\/AAAA/i);
+    if ((await byDatePlaceholder.count()) > 0) return byDatePlaceholder.first();
+
+    const byName = this.page.locator('input[name*="nascimento" i], input[id*="nascimento" i], input[name*="data" i], input[placeholder*="DD/MM"], input[type="date"]');
     return byName.first();
   }
 

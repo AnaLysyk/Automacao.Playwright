@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
+import path from 'path';
 
 // Eu carrego primeiro o .env.local para respeitar a configuração da máquina.
 dotenv.config({ path: '.env.local' });
@@ -10,6 +11,18 @@ const slowMo = Number(process.env.PW_SLOW_MO || 0);
 const executionMode = process.env.EXECUTION_MODE || 'manual-assisted';
 const isManualAssisted = executionMode === 'manual-assisted';
 const evidenceDir = process.env.EVIDENCE_DIR || 'test-results';
+const captureMode = process.env.CAPTURE_MODE || 'manual';
+const fakeVideoPath = process.env.CAMERA_FAKE_VIDEO_PATH || '';
+
+// Eu ativo a câmera fake somente quando o modo de captura pedir explicitamente.
+const chromiumArgs =
+  captureMode === 'fake-video' && fakeVideoPath
+    ? [
+        '--use-fake-device-for-media-stream',
+        '--use-fake-ui-for-media-stream',
+        `--use-file-for-fake-video-capture=${path.resolve(fakeVideoPath)}`,
+      ]
+    : [];
 
 export default defineConfig({
   testDir: './tests',
@@ -35,8 +48,10 @@ export default defineConfig({
     trace: isManualAssisted ? 'on' : 'on-first-retry',
     screenshot: isManualAssisted ? 'on' : 'only-on-failure',
     video: 'retain-on-failure',
+    permissions: captureMode === 'fake-video' ? ['camera', 'microphone'] : [],
     launchOptions: {
       slowMo: Number.isFinite(slowMo) ? slowMo : 0,
+      args: chromiumArgs,
     },
   },
   projects: [
