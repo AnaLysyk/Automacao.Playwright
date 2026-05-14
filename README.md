@@ -1,39 +1,112 @@
-# Automação Playwright - Booking / Cidadão Smart
+# Automação Playwright — Booking / Cidadão Smart
 
-Repositório de automação E2E, API e fluxos assistidos para Booking / Cidadão Smart / SMART, com foco em qualidade, rastreabilidade, automação funcional e apoio às validações dos fluxos críticos da Griaule.
+Repositório de automação com **Playwright** para validação dos fluxos do **Booking**, **Cidadão Smart** e integrações relacionadas ao **SMART**.
+
+O objetivo é organizar uma base de QA executável, rastreável e segura, com testes **E2E**, **API**, **validações assistidas**, evidências visuais e documentação de apoio para análise de falhas, regressão funcional e acompanhamento técnico dos fluxos críticos da Griaule.
 
 ## Objetivo
 
-Este repositório está em evolução para se tornar a base principal de automação do Booking / Cidadão Smart / SMART.
+Transformar os fluxos críticos do Booking e do Cidadão Smart em uma base de automação clara, fácil de executar e preparada para evolução.
 
-A prioridade inicial é:
+A automação deve apoiar:
 
-- organizar a fundação do projeto;
-- configurar ambientes 146 e 201;
-- estruturar agentes de automação;
-- estabilizar o fluxo assistido de agendamento presencial;
-- gerar evidências por etapa;
-- separar testes de API, E2E, Admin e manual-assisted;
-- evoluir fluxos assistidos para automações completas quando houver suporte de ambiente.
+- validações de regressão;
+- execução assistida de fluxos com CAPTCHA ou código de segurança;
+- análise de falhas em ambiente de homologação;
+- geração de evidências visuais;
+- separação entre testes de UI, API, E2E, Admin e fluxos assistidos;
+- documentação do comportamento esperado;
+- apoio à tomada de decisão durante validações de release.
 
-## Estrutura do Projeto
+## Escopo Inicial
+
+O foco inicial está nos fluxos relacionados ao **Booking consumido pelo Cidadão Smart**, principalmente:
+
+- agendamento presencial;
+- busca por cidade ou CEP;
+- seleção de posto;
+- preenchimento dos dados do requerente;
+- seleção de data e horário;
+- validação por código de segurança;
+- confirmação de agendamento;
+- geração de protocolo;
+- guia ou comprovante;
+- cancelamento, quando disponível;
+- consultas;
+- Booking Admin;
+- integrações API;
+- fluxos assistidos com CAPTCHA e validação por e-mail.
+
+Também serão organizados cenários para:
+
+- emissão online;
+- Notificador GBDS;
+- SMART;
+- conferência;
+- integrações entre Booking, Cidadão Smart e SMART.
+
+## Stack
+
+- Playwright
+- TypeScript
+- Page Object Model
+- Agentes de orquestração
+- Configuração por ambiente via `.env.local`
+- Evidências com screenshots, vídeos, traces e relatório HTML
+- Organização por contexto, casos de teste, specs e documentação técnica
+
+## Conceito da Arquitetura
+
+A automação é organizada em camadas:
+
+- **Contextos**: explicam regras, ambientes, dependências, known issues e responsabilidades dos módulos.
+- **Casos de teste**: descrevem cenários funcionais e regras esperadas.
+- **Page Objects**: representam telas e ações específicas da interface.
+- **Agentes**: orquestram fluxos maiores, etapas, pausas assistidas, evidências e classificação de falhas.
+- **Specs**: executam os testes chamando Page Objects, agentes ou APIs.
+- **Evidências**: registram o comportamento observado durante a execução.
+
+A ideia é evitar specs gigantes e manter cada camada com uma responsabilidade clara.
+
+## Estrutura Principal
+
+```text
+context/
+  requirements/
+  test-cases/
+
+docs/
+
+tests/
+  agents/
+  config/
+  data/
+  types/
+  pages/
+  booking/
+    public/
+    e2e/
+    manual-assisted/
+  booking-admin/
+    read-only/
+    write/
+  api/
+    booking/
+    cidadao-smart/
+    notifier/
+  manual-assisted/
+
+legacy/
+  automation-exercise/
+```
+
+## Pastas do Projeto
 
 ### `context/requirements/`
 
-Contém documentos de contexto funcional, regras de negócio, ambientes, known issues, APIs e integrações.
+Contém contexto funcional, regras de negócio, ambientes, known issues, APIs e integrações.
 
-Exemplos:
-
-- ambientes e acessos;
-- agendamento presencial;
-- Booking Admin;
-- API Cidadão Smart / Booking;
-- Notificador GBDS;
-- SMART / Conferência;
-- regras críticas;
-- known issues.
-
-Esses arquivos não substituem casos de teste. Eles explicam o funcionamento do produto e orientam a automação.
+Esses arquivos não substituem casos de teste. Eles explicam o produto e orientam a automação.
 
 ### `context/test-cases/`
 
@@ -41,13 +114,14 @@ Contém casos de teste exportados, estruturados ou organizados para apoiar a con
 
 ### `docs/`
 
-Contém guias operacionais do projeto:
+Contém guias operacionais e documentos de apoio:
 
 - guia de execução;
 - mapa de testes;
 - estratégia de automação;
 - evidências e relatórios;
-- análise de falhas.
+- análise de falhas;
+- relatórios de auditoria e execução.
 
 ### `tests/agents/`
 
@@ -62,21 +136,11 @@ Exemplos:
 - `StepAgent`;
 - `FailureClassifierAgent`.
 
-### `tests/config/`
-
-Contém leitura de ambiente, configuração de execução e registro de known issues.
-
-### `tests/data/`
-
-Contém massas controladas para execução dos testes.
-
-### `tests/types/`
-
-Contém contratos e tipos compartilhados pela automação.
-
 ### `tests/pages/`
 
 Contém Page Objects e seletores das telas automatizadas.
+
+Page Object conhece tela. Agent orquestra fluxo. Spec deve ficar limpa.
 
 ### `tests/booking/`
 
@@ -86,7 +150,7 @@ Contém testes da jornada pública do Booking consumida pelo Cidadão Smart.
 
 Contém validações do Painel Administrativo do Booking.
 
-Deve ser separado em:
+Separação esperada:
 
 - `read-only`: testes que apenas consultam informações;
 - `write`: testes que alteram configuração e exigem ambiente controlado.
@@ -111,8 +175,8 @@ A automação deve ser executada usando configuração por ambiente.
 
 Principais ambientes:
 
-- `146`: ambiente de desenvolvimento/homologação, usado para testes em andamento, validações novas e automação assistida;
-- `201`: ambiente produção ou produção-like, usado com mais cautela, priorizando validações read-only e comparações de comportamento.
+- `146`: desenvolvimento/homologação, usado para testes em andamento, validações novas e automação assistida;
+- `201`: produção ou produção-like, usado com cautela, priorizando validações read-only e comparações de comportamento.
 
 Use `.env.local` para configurar a execução real da máquina.
 
@@ -124,9 +188,10 @@ Não versionar:
 - chaves privadas;
 - códigos reais de segurança;
 - credenciais de VPN;
-- credenciais de banco ou servidor.
+- credenciais de banco ou servidor;
+- dados sensíveis reais.
 
-Exemplo de `.env.local`:
+Exemplo seguro de `.env.local`:
 
 ```env
 TARGET_ENV=146
@@ -200,13 +265,11 @@ Esses fluxos devem ser classificados como `manual-assisted`.
 Nesse modo, a automação pode:
 
 - abrir o navegador;
-- executar as etapas automaticamente;
+- executar etapas automaticamente;
 - pausar com `page.pause()`;
 - permitir intervenção humana;
 - continuar após Resume;
 - gerar evidências por etapa.
-
-## CAPTCHA
 
 CAPTCHA real não deve ser burlado.
 
@@ -247,12 +310,6 @@ Diretórios esperados:
 - `test-results/`;
 - `playwright-report/`.
 
-O relatório HTML pode ser aberto com:
-
-```bash
-npm run report
-```
-
 ## Classificação de Falhas
 
 Quando um teste falhar, a análise deve buscar classificar a causa provável.
@@ -279,19 +336,9 @@ Known issues são comportamentos conhecidos que podem aparecer durante a execuç
 
 Exemplo atual:
 
-- `KNOWN-POSTO-001`: Divergência Top Tower / Aeroporto.
+- `KNOWN-POSTO-001`: divergência Top Tower / Aeroporto.
 
 Esse comportamento deve ser registrado como warning, sem bloquear o E2E principal do agendamento enquanto estiver classificado como known issue.
-
-## Projeto Legado
-
-O conteúdo antigo do desafio Automation Exercise foi preservado em:
-
-```text
-legacy/automation-exercise/
-```
-
-Ele serve apenas como referência didática de Playwright e não faz parte da execução principal do Booking / Cidadão Smart.
 
 ## Referências do Projeto
 
@@ -299,9 +346,25 @@ Ele serve apenas como referência didática de Playwright e não faz parte da ex
 - Guia de execução: `docs/GUIA_DE_EXECUCAO.md`
 - Evidências e relatórios: `docs/EVIDENCIAS_E_RELATORIOS.md`
 - Mapa de testes: `docs/MAPA_DE_TESTES.md`
+- Estratégia de automação: `docs/ESTRATEGIA_DE_AUTOMACAO.md`
 - Guia de análise de falhas: `docs/GUIA_DE_ANALISE_DE_FALHAS.md`
+- Relatório de auditoria da fundação: `docs/RELATORIO_DE_AUDITORIA_DA_FUNDACAO.md`
 - Contextos funcionais: `context/requirements/`
 - Casos de teste: `context/test-cases/`
+
+## Status do Projeto
+
+Este repositório está em evolução para se tornar a base principal de automação do Booking / Cidadão Smart / SMART.
+
+A prioridade atual é:
+
+- manter a fundação organizada;
+- configurar ambientes 146 e 201;
+- estruturar agentes de automação;
+- estabilizar o fluxo assistido de agendamento presencial;
+- gerar evidências por etapa;
+- separar testes de API, E2E, Admin e manual-assisted;
+- evoluir fluxos assistidos para automações completas quando houver suporte de ambiente.
 
 ## Autoria
 
