@@ -1,0 +1,41 @@
+{
+  "module": "Cidadao Smart",
+  "feature": "Agendamento presencial",
+  "defaultServicePoint": {
+    "name": "PCI - FLORIANÓPOLIS - Top Tower",
+    "city": "Florianópolis",
+    "address": "Rua Esteves Júnior, 50"
+  },
+  "scenarios": [
+    {
+      "id": "CID-AGP-001",
+      "title": "Fluxo completo com CPF valido",
+      "type": "positive",
+      "expectedResult": "Deve concluir ate confirmacao com protocolo gerado."
+    },
+    {
+      "id": "CID-AGP-002",
+      "title": "CPF vazio permitido",
+      "type": "positive",
+      "expectedResult": "Deve permitir avancar no fluxo."
+    },
+    {
+      "id": "CID-AGP-003",
+      "title": "Nome com apenas uma palavra",
+      "type": "negative",
+      "expectedResult": "Deve exibir mensagem Digite nome e sobrenome."
+    },
+    {
+      "id": "CID-AGP-004",
+      "title": "Telefone vazio",
+      "type": "negative",
+      "expectedResult": "Deve bloquear avancar e sinalizar obrigatoriedade."
+    },
+    {
+      "id": "CID-AGP-005",
+      "title": "Data menor de 16 anos",
+      "type": "negative",
+      "expectedResult": "Deve aplicar regra de idade minima."
+    }
+  ]
+}

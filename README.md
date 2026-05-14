@@ -1,70 +1,105 @@
-# Desafio de Automacao com Playwright
+﻿# Projeto Demo Playwright - Cidadao Smart
 
-## Introdução
-Projeto de automacao de testes **E2E (UI)** e **API** para o site https://automationexercise.com  
+Repositório de demonstração de automação E2E com Playwright para o Cidadão Smart, com foco em validação técnica e apresentação para a Griaule.
 
-Desenvolvido em **JavaScript com Playwright**, usando **Page Object Model (POM)** e **massa de dados dinamica** para manter os testes **independentes, reutilizaveis e estaveis**.
+## Objetivo da Demo
 
-## Tecnologias Utilizadas
-- Node.js
-- Playwright
-- JavaScript 
-- Page Object Model
+Mostrar, de ponta a ponta, que um fluxo estruturado de QA consegue:
+1. ler requisito
+2. planejar testes
+3. gerar automação Playwright
+4. executar testes
+5. salvar evidência
+6. gerar relatório
+7. sugerir correção técnica quando houver falha
 
-## Instalacao 
--npm install
+## Escopo Atual
 
-## Execucao dos Testes
-Executar toda a suite (UI + API): npm test 
-Executar apenas testes E2E (UI): npm run test:e2e
-Executar apenas testes de API: npm run test:api
+- Agendamento presencial
+- Emissao online - captura
+- Emissao online - resumo
 
-## Relatorio de Testes
-Gerado em: playwright-report/
-Visualizar: npx playwright show-report
+## Estrutura Principal
 
-## Estrutura do Projeto
-pages/
- ├─ PaginaInicial.js
- ├─ PaginaCadastroLogin.js
- ├─ PaginaProdutos.js
- └─ PaginaCarrinho.js
+- tests/: specs executaveis
+- tests/pages/: page objects
+- tests/pages/selectors/: seletores
+- tests/support/: dados, rotas, timeouts, relatorios
+- prompts/: prompts de execução
+- specs/: planos de teste gerados
+- test-results/: evidências e relatórios
+- docs/: guias e materiais de apresentacao
 
-tests/
- ├─ e2e/
- │   └─ automation-exercise.spec.js
- └─ api/
-     └─ automation-exercise-api.spec.js
+## Pre-requisitos
 
-utils/
- └─ gerador-dados.js
+- Node.js 18+
+- VPN conectada ao ambiente alvo
+- URL do Cidadao Smart acessivel
 
-## Cobertura dos Cenarios
-Testes E2E (UI)
-- Cadastro de usuario com sucesso
-- Login com credenciais validas
-- Login com credenciais invalidas
-- Busca de produtos
-- Adicao de produtos ao carrinho e validacao de valores
+## Configuracao Rapida
 
-Testes de API
-- Listagem de todos os produtos
-- Busca de produto por nome
-- Busca de produto sem informar parametro
-- Validacao de login via API com credenciais validas
+1. Instalar dependencias:
 
-## Boas Praticas Aplicadas
-- Uso de Page Object Model (POM) para organizacao e reutilizacao
-- Separacao clara entre logica de teste e massa de dados
-- Seletores estaveis priorizando: `data-qa`, `id`, roles de acessibilidade
-- Dados dinamicos (nome, email, senha e data de nascimento unicos a cada execucao)
-- Testes independentes, capazes de rodar isoladamente
-- Sem uso de `waitForTimeout` ou esperas artificiais
+```bash
+npm install
+```
 
-## Observacoes Importantes
-- O site Automation Exercise e publico e pode apresentar lentidao.
-- Timeouts e retries ajustados em `playwright.config.js` para estabilidade sem mascarar problemas reais.
-- Todos os testes estao em portugues, com nomes claros e padronizados.
+2. Instalar browsers do Playwright:
 
-## Autora
-Projeto desenvolvido por Ana Lysyk 
+```bash
+npx playwright install
+```
+
+3. Criar .env com base no .env.example.
+
+## Conexao de E-mail para Validacao
+
+O fluxo de autenticacao aceita dois modos:
+
+- env: usa codigo fixo em CIDADAO_SMART_SECURITY_CODE
+- imap: busca codigo automaticamente no e-mail
+
+Exemplo rapido para IMAP no .env:
+
+```env
+CIDADAO_SMART_SECURITY_CODE_SOURCE=imap
+CIDADAO_SMART_EMAIL_IMAP_HOST=imap.gmail.com
+CIDADAO_SMART_EMAIL_IMAP_PORT=993
+CIDADAO_SMART_EMAIL_IMAP_SECURE=true
+CIDADAO_SMART_EMAIL_IMAP_USER=seu-email@dominio.com
+CIDADAO_SMART_EMAIL_IMAP_PASSWORD=sua-senha-ou-app-password
+CIDADAO_SMART_EMAIL_IMAP_MAILBOX=INBOX
+CIDADAO_SMART_EMAIL_FROM_FILTER=no-reply@dominio.com
+CIDADAO_SMART_EMAIL_CODE_REGEX=\b(\d{6})\b
+```
+
+Observacao: nao automatizamos UI do Gmail. A leitura e feita por protocolo IMAP.
+
+## Comandos Principais
+
+```bash
+npm run test:list
+npm run test:cidadao:agendamento
+npm run test:cidadao:emissao:captura
+npm run test:cidadao:emissao:resumo
+npm run report:testing-company
+npm run report:griaule
+```
+
+## Regra Critica de Negocio
+
+A validacao de resumo e confirmacao deve refletir o posto efetivamente selecionado no inicio do fluxo.
+
+Se houver divergencia de posto, o teste deve falhar e o resultado deve ser classificado como bug de produto.
+
+## Evidencias
+
+- Artefatos do Playwright: test-results/
+- Protocolos gerados: test-results/reports/protocolos-gerados.json
+- Relatorios de execucao: test-results/reports/
+
+## Referencias
+
+- Regras de execução: AGENTS.md
+- Guia de execucao: docs/GUIA_DE_EXECUCAO.md
+- Estratégia de QA: docs/ESTRATEGIA_QA.md
