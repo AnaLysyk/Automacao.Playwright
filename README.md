@@ -11,7 +11,7 @@ Transformar os fluxos críticos do Booking e do Cidadão Smart em uma base de au
 A automação deve apoiar:
 
 - validações de regressão;
-- execução assistida de fluxos com CAPTCHA ou código de segurança;
+- execução assistida de fluxos com CAPTCHA e código de segurança;
 - análise de falhas em ambiente de homologação;
 - geração de evidências visuais;
 - separação entre testes de UI, API, E2E, Admin e fluxos assistidos;
