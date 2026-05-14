@@ -5,6 +5,8 @@ test-results/
 playwright/.auth/
 .env
 .env.local
+*.log
+debug.log
 .DS_Store
 dist/
 coverage/
