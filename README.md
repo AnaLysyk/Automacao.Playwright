@@ -1,6 +1,6 @@
-# Automacao Playwright - Booking / Cidadao Smart
+# Automação Playwright - Booking / Cidadao Smart
 
-Repositorio de automacao E2E, API e fluxos assistidos para Booking / Cidadao Smart / SMART, com foco em demonstracao tecnica, regressao funcional e evidencia visual para a Griaule.
+Repositório  de automação E2E, API e fluxos assistidos para Booking / Cidadao Smart / SMART, com foco em demonstração técnica, regressão funcional e evidencia visual para a Griaule.
 
 ## Objetivo
 
