@@ -1,105 +1,124 @@
-﻿# Projeto Demo Playwright - Cidadao Smart
+# Automacao Playwright - Booking / Cidadao Smart
 
-Repositório de demonstração de automação E2E com Playwright para o Cidadão Smart, com foco em validação técnica e apresentação para a Griaule.
+Repositorio de automacao E2E, API e fluxos assistidos para Booking / Cidadao Smart / SMART, com foco em demonstracao tecnica, regressao funcional e evidencia visual para a Griaule.
 
-## Objetivo da Demo
+## Objetivo
 
-Mostrar, de ponta a ponta, que um fluxo estruturado de QA consegue:
-1. ler requisito
-2. planejar testes
-3. gerar automação Playwright
-4. executar testes
-5. salvar evidência
-6. gerar relatório
-7. sugerir correção técnica quando houver falha
+Transformar os fluxos criticos do Cidadao Smart em uma base de QA executavel com Playwright:
 
-## Escopo Atual
+- agendamento presencial;
+- emissao online;
+- consultas;
+- Booking Admin;
+- integracoes API;
+- fluxos assistidos com CAPTCHA e codigo de seguranca.
 
-- Agendamento presencial
-- Emissao online - captura
-- Emissao online - resumo
+## Stack
 
-## Estrutura Principal
+- Playwright
+- TypeScript
+- Page Object Model
+- Agentes de orquestracao
+- Configuracao por ambiente via `.env.local`
 
-- tests/: specs executaveis
-- tests/pages/: page objects
-- tests/pages/selectors/: seletores
-- tests/support/: dados, rotas, timeouts, relatorios
-- prompts/: prompts de execução
-- specs/: planos de teste gerados
-- test-results/: evidências e relatórios
-- docs/: guias e materiais de apresentacao
+## Estrutura principal
 
-## Pre-requisitos
+- `context/requirements/`: regras de negocio, ambientes, known issues e APIs.
+- `docs/`: guias de execucao, mapa de testes, estrategia e relatorios.
+- `tests/agents/`: agentes que orquestram fluxos, etapas, evidencia e falhas.
+- `tests/config/`: leitura de ambiente e known issues.
+- `tests/data/`: massa de teste controlada.
+- `tests/types/`: contratos compartilhados de execucao.
+- `tests/pages/`: Page Objects e seletores.
+- `tests/booking/`: automacao publica de Booking/Cidadao Smart.
+- `tests/booking-admin/`: validacoes do painel administrativo.
+- `tests/api/`: validacoes API e diagnosticos.
+- `tests/manual-assisted/`: demos que exigem intervencao humana.
+- `legacy/automation-exercise/`: projeto antigo usado como referencia didatica.
 
-- Node.js 18+
-- VPN conectada ao ambiente alvo
-- URL do Cidadao Smart acessivel
+## Ambientes
 
-## Configuracao Rapida
+Use `.env.local` para a configuracao real da maquina. Nao versionar senhas, tokens, codigos de seguranca ou credenciais.
 
-1. Instalar dependencias:
+Variaveis principais:
+
+```env
+TARGET_ENV=146
+CIDADAO_SMART_BASE_URL=https://172.16.1.146
+BOOKING_ADMIN_BASE_URL=https://172.16.1.146/admin/login
+SMART_REACT_URL=http://172.16.1.146:8100/react
+CAPTCHA_MODE=manual
+EXECUTION_MODE=manual-assisted
+CIDADAO_SMART_SECURITY_CODE=
+PW_SLOW_MO=300
+```
+
+## Comandos
+
+Instalar dependencias:
 
 ```bash
 npm install
 ```
 
-2. Instalar browsers do Playwright:
+Instalar navegadores:
 
 ```bash
 npx playwright install
 ```
 
-3. Criar .env com base no .env.example.
-
-## Conexao de E-mail para Validacao
-
-O fluxo de autenticacao aceita dois modos:
-
-- env: usa codigo fixo em CIDADAO_SMART_SECURITY_CODE
-- imap: busca codigo automaticamente no e-mail
-
-Exemplo rapido para IMAP no .env:
-
-```env
-CIDADAO_SMART_SECURITY_CODE_SOURCE=imap
-CIDADAO_SMART_EMAIL_IMAP_HOST=imap.gmail.com
-CIDADAO_SMART_EMAIL_IMAP_PORT=993
-CIDADAO_SMART_EMAIL_IMAP_SECURE=true
-CIDADAO_SMART_EMAIL_IMAP_USER=seu-email@dominio.com
-CIDADAO_SMART_EMAIL_IMAP_PASSWORD=sua-senha-ou-app-password
-CIDADAO_SMART_EMAIL_IMAP_MAILBOX=INBOX
-CIDADAO_SMART_EMAIL_FROM_FILTER=no-reply@dominio.com
-CIDADAO_SMART_EMAIL_CODE_REGEX=\b(\d{6})\b
-```
-
-Observacao: nao automatizamos UI do Gmail. A leitura e feita por protocolo IMAP.
-
-## Comandos Principais
+Listar testes:
 
 ```bash
 npm run test:list
-npm run test:cidadao:agendamento
-npm run test:cidadao:emissao:captura
-npm run test:cidadao:emissao:resumo
-npm run report:testing-company
-npm run report:griaule
 ```
 
-## Regra Critica de Negocio
+Rodar fluxo assistido de Booking:
 
-A validacao de resumo e confirmacao deve refletir o posto efetivamente selecionado no inicio do fluxo.
+```bash
+npm run test:booking:assistido
+```
 
-Se houver divergencia de posto, o teste deve falhar e o resultado deve ser classificado como bug de produto.
+Rodar regressao automatica:
+
+```bash
+npm run test:all
+```
+
+Abrir relatorio HTML:
+
+```bash
+npm run report
+```
+
+## Fluxos assistidos
+
+Fluxos com CAPTCHA real ou codigo por e-mail ficam em suites assistidas. Eles podem abrir navegador, pausar com `page.pause()` e gerar evidencias por etapa.
+
+Nao burlar CAPTCHA real. Estrategias permitidas:
+
+- `CAPTCHA_MODE=manual`;
+- `CAPTCHA_MODE=disabled` somente em QA controlado;
+- `CAPTCHA_MODE=test` somente quando oficialmente suportado.
 
 ## Evidencias
 
-- Artefatos do Playwright: test-results/
-- Protocolos gerados: test-results/reports/protocolos-gerados.json
-- Relatorios de execucao: test-results/reports/
+Artefatos locais:
+
+- `test-results/`;
+- `playwright-report/`;
+- screenshots;
+- videos;
+- traces;
+- resumos Markdown em `docs/` quando o resultado precisa ir para GitHub.
+
+## Projeto legado
+
+O conteudo antigo do desafio Automation Exercise foi preservado em `legacy/automation-exercise/`. Ele nao faz parte da execucao principal do Booking/Cidadao Smart.
 
 ## Referencias
 
-- Regras de execução: AGENTS.md
-- Guia de execucao: docs/GUIA_DE_EXECUCAO.md
-- Estratégia de QA: docs/ESTRATEGIA_QA.md
+- Regras do agente: `AGENTS.md`
+- Guia de execucao: `docs/GUIA_EXECUCAO.md`
+- Evidencias: `docs/EVIDENCIAS_E_RELATORIOS.md`
+- Mapa de testes: `docs/MAPA_TESTES.md`
