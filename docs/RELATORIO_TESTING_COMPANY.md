@@ -64,7 +64,7 @@ Implementação baseada em papéis especializados com responsabilidades claras:
 
 **Documentação Técnica**:
 - `docs/MATRIZ_DE_TESTES_E_EXECUCAO.md`
-- `docs/ESTRATEGIA_QA.md`
+- `docs/ESTRATEGIA_DE_AUTOMACAO.md`
 - `docs/FLUXOS_AUTOMATIZADOS.md`
 - `docs/GUIA_DE_EXECUCAO.md`
 - `docs/QA_WORKFLOW_MVP.md`

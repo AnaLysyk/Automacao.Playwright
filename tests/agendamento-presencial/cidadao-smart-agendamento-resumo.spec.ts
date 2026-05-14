@@ -2,6 +2,7 @@ import { test } from '../fixtures';
 import { CidadaoSmartAgendamentoDataHoraPage } from '../pages/CidadaoSmartAgendamentoDataHoraPage';
 import { CidadaoSmartAgendamentoLocalPage } from '../pages/CidadaoSmartAgendamentoLocalPage';
 import { CidadaoSmartAgendamentoResumoPage } from '../pages/CidadaoSmartAgendamentoResumoPage';
+import { cidadaoSmartTestData } from '../support/data/cidadaoSmartTestData';
 
 test.describe('Cidadao Smart - Resumo do agendamento', () => {
   test('deve exibir dados completos do resumo para Top Tower', async ({ page }) => {
@@ -9,19 +10,21 @@ test.describe('Cidadao Smart - Resumo do agendamento', () => {
     const dataHoraPage = new CidadaoSmartAgendamentoDataHoraPage(page);
     const resumoPage = new CidadaoSmartAgendamentoResumoPage(page);
 
+    const dadosPessoa = cidadaoSmartTestData.requerenteDemo;
+    const dadosAgendamento = cidadaoSmartTestData.agendamentoDemo;
     const dados = {
       cidade: 'Florianópolis',
       posto: 'PCI - FLORIANÓPOLIS - Top Tower',
       endereco: 'Rua Esteves Júnior, 50',
-      cpfSemMascara: '03659184829',
-      cpfComMascara: '036.591.848-29',
-      nome: 'Ana Teste Automacao',
-      dataNascimento: '01/01/2009',
-      email: 'ana.testing.company@gmail.com',
-      telefoneSemMascara: '55555555555',
-      telefoneComMascara: '(55) 55555-5555',
-      dataAgendamento: '18/05/2026',
-      horario: '08:00',
+      cpfSemMascara: dadosPessoa.cpfSemMascara,
+      cpfComMascara: dadosPessoa.cpfComMascara,
+      nome: dadosPessoa.nome,
+      dataNascimento: dadosPessoa.dataNascimento,
+      email: dadosPessoa.email,
+      telefoneSemMascara: dadosPessoa.telefoneSemMascara,
+      telefoneComMascara: dadosPessoa.telefoneComMascara,
+      dataAgendamento: dadosAgendamento.dataAgendamento,
+      horario: dadosAgendamento.horario,
     };
 
     await localPage.acessar();

@@ -41,7 +41,7 @@ export class EvidenceAgent {
   ) {}
 
   async start(): Promise<void> {
-    this.targetDir = path.join('test-results', 'booking', 'manual-assisted', timestampForDir());
+    this.targetDir = path.join(this.context.env.evidenceDir, 'booking', 'manual-assisted', timestampForDir());
     this.context.evidenceDir = this.targetDir;
     fs.mkdirSync(this.targetDir, { recursive: true });
     await this.capture('00-inicio', { description: 'Inicio do fluxo assistido', status: 'parcial' });

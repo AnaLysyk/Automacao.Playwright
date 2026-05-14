@@ -1,414 +1,393 @@
 # AGENTS.md
 
-## Visao Geral do Projeto
+## Visão Geral
 
-Este repositorio demonstra automacao E2E com Playwright para o Cidadao Smart, com foco em apresentacao para Griaule.
+Este repositório é a base de automação Playwright para Booking / Cidadão Smart / SMART.
 
-Fluxo esperado:
-- ler requisito
-- planejar testes
-- gerar automação Playwright
-- executar testes
-- salvar evidências
-- gerar relatório
-- sugerir correção técnica quando houver falha
+O objetivo é construir uma automação profissional, rastreável e segura para os fluxos críticos da Griaule, com suporte a ambientes 146 e 201, evidências por etapa, classificação de falhas e separação clara entre contexto funcional, casos de teste e specs automatizadas.
 
-## Escopo Principal
+O projeto antigo Automation Exercise é legado e não faz parte da execução principal.
 
-- Cidadao Smart - Agendamento Presencial
-- Cidadao Smart - Emissao Online (captura e resumo)
-- Fluxos complementares de consulta quando aplicavel
+## Regras Obrigatórias
 
-## Arquitetura Obrigatoria
+1. Usar TypeScript.
+2. Não commitar senhas, tokens, credenciais, VPN, root, códigos reais ou dados sensíveis.
+3. Não burlar CAPTCHA real.
+4. Tratar fluxos com CAPTCHA e código por e-mail como `manual-assisted`.
+5. Separar contexto, casos de teste e automação.
+6. Contexto funcional fica em `context/requirements/`.
+7. Casos de teste ficam em `context/test-cases/`, Qase ou CDS.
+8. Specs automatizadas ficam em `tests/`.
+9. Page Objects representam telas.
+10. Agents orquestram fluxos.
+11. Specs devem ser limpas e chamar agents.
+12. Gerar evidência por etapa quando houver execução de fluxo.
+13. Tratar `KNOWN-POSTO-001` Top Tower/Aeroporto como warning, não como falha do E2E principal.
+14. Automation Exercise deve ficar em `legacy/automation-exercise/` e não fazer parte da execução principal.
+15. A automação deve suportar ambientes 146 e 201 por `.env.local`.
+16. Não implementar fluxo completo antes da fundação compilar.
+17. O primeiro pacote deve garantir que `npx playwright test --list` funcione e que o project `chromium` exista.
 
-Usar a estrutura organizada do repositorio, sem arquitetura paralela.
+## Estrutura Oficial
 
-Pastas oficiais:
-- tests/e2e/* para fluxos E2E independentes (sem intervencao manual)
-- tests/manual-assisted/* para demos e testes assistidos (requerem acao manual)
-- tests/agendamento-presencial/* para testes de regressao (agendamento presencial)
-- tests/emissao-online/* para testes de regressao (emissao online)
-- tests/consulta/* para testes de regressao (consultas)
-- tests/2via/* para testes de regressao (2via)
-- tests/api/* para testes de integracao com APIs
-- tests/pages/*Page.ts para Page Objects
-- tests/pages/selectors/*Selectors.ts para seletores
-- tests/support/* para helpers, dados, rotas e diagnosticos
-- context/requirements/* para regras de negocio
-- context/user-stories/* para historias
-- context/test-cases/* para repositorio de casos
-- prompts/* para prompts de execução
-- specs/* para planos de teste gerados
-- test-results/* para artefatos de execução
+Use a estrutura abaixo. Não criar arquitetura paralela.
 
-## Regras de Implementacao Playwright
+```text
+context/
+  requirements/
+  test-cases/
 
-- usar TypeScript
-- usar Page Object Model
-- manter seletores separados dos metodos de pagina
-- preferir getByRole, getByLabel, getByPlaceholder, getByText e getByTestId
-- evitar XPath
-- evitar CSS fragil
-- evitar excesso de nth()
-- usar test.step em fluxos maiores
-- validar URL apos navegacao
-- validar textos de negocio na tela
-- manter trace, screenshot e video em caso de falha
+docs/
 
-## Regras de Seguranca
+tests/
+  agents/
+  config/
+  data/
+  types/
+  pages/
+  booking/
+    public/
+    e2e/
+    manual-assisted/
+  booking-admin/
+    read-only/
+    write/
+  api/
+    booking/
+    cidadao-smart/
+    notifier/
+
+legacy/
+  automation-exercise/
+```
+
+## Contexto, Caso de Teste e Automação
+
+`context/requirements/` explica o produto:
+
+- regra de negócio;
+- ambiente;
+- integração;
+- known issue;
+- comportamento esperado;
+- dependência operacional.
+
+`context/test-cases/`, Qase ou CDS descrevem casos de teste.
+
+`tests/` contém a automação executável.
+
+Não transformar documento de contexto em spec diretamente sem extrair critério de aceite e comportamento verificável.
+
+## Page Objects
+
+Page Objects conhecem telas.
+
+Eles devem conter ações pequenas e diretas:
+
+- acessar tela;
+- validar tela;
+- clicar;
+- preencher;
+- selecionar data;
+- selecionar horário;
+- prosseguir;
+- ler mensagem ou valor exibido.
+
+Page Object não decide o fluxo completo e não classifica falha de negócio.
+
+Seletores devem ficar separados quando houver arquivo de selectors da tela.
+
+Preferir:
+
+- `getByRole`;
+- `getByLabel`;
+- `getByPlaceholder`;
+- `getByText`;
+- `getByTestId`.
+
+Evitar:
+
+- XPath;
+- CSS frágil;
+- excesso de `nth()`;
+- seletor baseado em layout instável.
+
+## Agents
+
+Agents orquestram fluxos.
+
+Eles sabem:
+
+- qual tela vem depois;
+- quando pausar;
+- quando registrar evidência;
+- quando tratar CAPTCHA;
+- quando tratar código por e-mail;
+- quando continuar;
+- quando classificar erro;
+- quando registrar known issue.
+
+Agents devem usar Page Objects. Não colocar seletores diretos na spec.
+
+## Specs
+
+Specs devem ser limpas.
+
+Exemplo esperado:
+
+```ts
+test('@booking @manual-assisted @e2e agendamento presencial assistido', async ({ page }) => {
+  const agent = new BookingAgendamentoAssistidoAgent(page);
+  await agent.executarFluxoCompleto();
+});
+```
+
+Specs não devem concentrar regra de tela, lógica de fluxo, CAPTCHA, e-mail ou evidência.
+
+## Ambientes
+
+A automação deve ser configurada por `.env.local`.
+
+Ambientes principais:
+
+- `146`: desenvolvimento/homologação, usado para testes em andamento, validações novas e automação assistida.
+- `201`: produção ou produção-like, usado com cautela, priorizando validações read-only e comparação de comportamento.
+
+Variáveis principais:
+
+```env
+TARGET_ENV=146
+CIDADAO_SMART_BASE_URL=https://172.16.1.146
+BOOKING_ADMIN_BASE_URL=https://172.16.1.146/admin/login
+SMART_REACT_URL=http://172.16.1.146:8100/react
+CAPTCHA_MODE=manual
+EXECUTION_MODE=manual-assisted
+CIDADAO_SMART_SECURITY_CODE=
+PW_SLOW_MO=300
+EVIDENCE_DIR=test-results
+```
+
+Antes de executar testes que acessam ambiente interno, validar VPN e URL manualmente.
+
+## Segurança
 
 Nunca versionar:
-- .env
-- credenciais
-- tokens Gmail
-- codigos de seguranca
-- dados sensiveis reais
-- credenciais de VPN
 
-## Regras de Ambiente
+- `.env`;
+- `.env.local`;
+- senhas;
+- tokens;
+- credenciais;
+- chaves privadas;
+- códigos reais de segurança;
+- credenciais de VPN;
+- credenciais de banco ou servidor;
+- dados sensíveis reais;
+- artefatos locais de execução.
 
-A aplicacao normalmente depende de VPN.
+`.env.example` deve conter apenas placeholders seguros.
 
-Antes da execucao, validar:
-- VPN conectada
-- CIDADAO_SMART_BASE_URL configurada
-- URL acessa manualmente
-- CAPTCHA_MODE configurado
+## CAPTCHA
 
-## Regras de CAPTCHA
+CAPTCHA real não deve ser burlado.
 
-Nunca burlar CAPTCHA real.
+Estratégias permitidas:
 
-Estrategias permitidas:
-- CAPTCHA_MODE=manual
-- CAPTCHA_MODE=disabled em QA controlado
-- CAPTCHA_MODE=test quando oficialmente suportado
-- allowlist em ambiente de QA controlado
+- `CAPTCHA_MODE=manual`: resolução manual durante execução assistida.
+- `CAPTCHA_MODE=disabled`: somente em QA controlado.
+- `CAPTCHA_MODE=test`: somente quando oficialmente suportado.
+- allowlist: somente em ambiente QA controlado.
 
-## Regras de Codigo por Email
+Fluxos que dependem de CAPTCHA real devem ficar em:
 
-Nao automatizar UI do Gmail.
+```text
+tests/booking/manual-assisted/
+tests/manual-assisted/
+```
 
-Usar:
-- CIDADAO_SMART_SECURITY_CODE para execucoes manuais temporarias
-- helper via API de email em evolucao futura
+## Código de Segurança por E-mail
 
-## Classificacao de Testes
+Não automatizar UI do Gmail.
 
-### 1. Testes Automaticos Estáveis (Regressão)
+Estratégias permitidas:
 
-São testes que rodam SEM intervencao humana e validam partes especificas do sistema.
+- `CIDADAO_SMART_SECURITY_CODE` em `.env.local`;
+- preenchimento manual na tela;
+- Gmail API/OAuth em evolução futura;
+- endpoint interno de QA;
+- leitura autorizada de logs;
+- mock/fake provider em ambiente controlado.
 
-Pastas:
-- tests/agendamento-presencial/
-- tests/emissao-online/
-- tests/consulta/
-- tests/2via/
-- tests/api/
+Enquanto o código depender de pessoa ou e-mail real, o fluxo é `manual-assisted`.
 
-Características:
-- Independentes entre si
-- Sem dependencia de CAPTCHA manual
-- Sem dependencia de email
-- Sem dependencia de intervencao manual
-- Validam aspectos isolados (um teste = uma funcionalidade)
-
-Exemplos de nomes:
-- [AGP-LOCAL-001] Validar tela de selecao de localizacao
-- [AGP-DH-001] Validar selecao de data e horario disponivel
-- [AGP-REQ-001] Validar validacao de telefone vazio
+## Evidências
 
-### 2. Testes E2E (Fluxos Completos Automaticos)
+Fluxos relevantes devem registrar evidência por etapa.
 
-São testes que validam o fluxo inteiro da aplicacao, fim ao fim, sem intervencao manual.
+Evidências esperadas:
 
-Pasta:
-- tests/e2e/
+- screenshot;
+- vídeo;
+- trace;
+- URL atual;
+- timestamp;
+- etapa;
+- status;
+- known issue;
+- classificação de falha;
+- resumo Markdown quando aplicável.
 
-Características:
-- Testam fluxo ponta a ponta
-- Nao dependem de outro teste ter rodado antes
-- Podem reaproveitar Page Objects e dados
-- Podem ser maiores e mais complexos
+Diretórios esperados:
 
-Exemplos de nomes:
-- [AGP-E2E-001] Agendamento presencial completo com posto Top Tower
-- [EMISSAO-E2E-001] Emissao online completa com captura
+```text
+test-results/
+playwright-report/
+```
 
-### 3. Testes Assistidos / Demo (Manual-Assisted)
+## Known Issues
 
-São testes que requerem intervencao humana durante a execucao e sao uteis para demonstracao.
+Known issues são comportamentos já mapeados que não devem quebrar o fluxo principal quando a regra do projeto mandar continuar.
 
-Pasta:
-- tests/manual-assisted/
+Known issue atual:
 
-Características:
-- Requerem acao manual (CAPTCHA, cliques, etc)
-- Uteis para demonstracao
-- NAO devem ser tratados como regressao automatica
-- Podem depender de ambiente instavel ou agenda disponivel
+```text
+KNOWN-POSTO-001 - Divergência Top Tower / Aeroporto
+```
 
-Exemplos de nomes:
-- [DEMO-AGP-001] Fluxo completo assistido de agendamento com CAPTCHA e codigo
-- [DEMO-EMISSAO-001] Demo de emissao completa com envio de email
+Se aparecer Aeroporto após seleção de Top Tower:
 
-## Nomeacao de Testes
+- registrar warning;
+- registrar evidência;
+- não quebrar o E2E principal por essa divergência específica;
+- não alterar a expectativa de negócio para esconder o problema.
 
-Use padroes consistentes:
+## Classificação de Falhas
 
-[TIPO-FUNCAO-NUMERO] Descricao clara do que valida
+Ao falhar, classificar a causa provável:
 
-Abreviacoes:
-- AGP = Agendamento Presencial
-- EMI = Emissao Online
-- CONS = Consulta
-- 2V = 2Via
-- API = Integracao API
-- E2E = Fluxo completo automatico
-- DEMO = Teste assistido
-- LOCAL = Tela de localizacao
-- DH = Data e Hora
-- REQ = Requerente
-- RES = Resumo
-- AUTH = Autenticacao
+- produto;
+- automação;
+- ambiente;
+- massa;
+- configuração;
+- permissão;
+- integração;
+- agenda indisponível;
+- CAPTCHA;
+- código de e-mail;
+- known issue.
 
-Exemplos:
-- [AGP-LOCAL-001] Validar tela de localizacao
-- [AGP-DH-002] Validar selecao de horario
-- [EMI-CAPT-001] Validar captura de documento
-- [CONS-AGEN-001] Validar consulta de agendamento
-- [API-NOTIF-001] Validar notificacao GBDS
+Não tratar todo erro automaticamente como bug de produto.
 
-## Regra Critica: Independencia de Testes
+## Ordem de Implementação
 
-Cada teste deve:
+Não abrir novas frentes fora desta ordem.
 
-1. Comecar sozinho (nao depender de outro ter rodado antes)
-2. Preparar o que precisa (dados, estado, autenticacao)
-3. Executar seu fluxo
-4. Falhar sozinho (sem afetar outros testes)
+### Pacote 1 - Fundação
 
-O que PODE ser compartilhado:
-- Massa de dados (em support/data/)
-- Funcoes auxiliares (em support/helpers/)
-- Page Objects (em pages/)
-- Seletores (em pages/selectors/)
+Criar ou ajustar:
 
-O que NAO PODE ser compartilhado:
-- Teste 2 depender do teste 1 ter rodado
-- Teste 3 depender do protocolo criado no teste 2
-- Teste de regressao depender de CAPTCHA manual
-- Teste depender de email recebido
+- `AGENTS.md`;
+- `.env.example`;
+- `package.json`;
+- `playwright.config.ts`;
+- `tsconfig.json`;
+- `.gitignore`;
+- estrutura de pastas;
+- `tests/config/env.ts`;
+- `tests/config/knownIssues.ts`;
+- `tests/types/ExecutionContext.ts`;
+- `tests/data/bookingAgendamentoData.ts`;
+- `tests/agents/EvidenceAgent.ts`;
+- `tests/agents/StepAgent.ts`.
 
-## Regra Critica: Intervencao Manual
+Critério mínimo:
 
-NAO permitida em:
-- tests/agendamento-presencial/
-- tests/emissao-online/
-- tests/consulta/
-- tests/2via/
-- tests/api/
-- tests/e2e/
+- TypeScript compila;
+- `npx playwright test --list` funciona;
+- project `chromium` existe;
+- Automation Exercise está em `legacy/automation-exercise/`.
 
-PERMITIDA apenas em:
-- tests/manual-assisted/
+### Pacote 2 - Barreiras Manuais
 
-## Regra Critica: Posto Selecionado
+Criar:
 
-A validacao de resumo e confirmacao deve refletir EXATAMENTE o posto selecionado no fluxo.
+- `tests/agents/CaptchaAgent.ts`;
+- `tests/agents/EmailCodeAgent.ts`.
 
-Se a tela mostrar posto diferente do selecionado:
-- Classificar como bug de produto
-- NAO alterar expectativa de negocio para fazer teste passar
-- Reportar no relatorio
+Responsabilidades:
 
-## Regras de Ambiente
+- CAPTCHA: detectar, pausar, orientar, continuar após Resume.
+- Código por e-mail: usar `.env.local` ou permitir preenchimento manual.
 
-A aplicacao normalmente depende de VPN.
+### Pacote 3 - Fluxo Assistido
 
-Antes da execucao, validar:
-- VPN conectada
-- CIDADAO_SMART_BASE_URL configurada
-- URL acessa manualmente
-- CAPTCHA_MODE configurado (conforme tipo de teste)
+Criar:
 
-Para testes assistidos (manual-assisted):
-- CAPTCHA_MODE=manual (usuario marca manualmente)
+- `tests/agents/BookingAgendamentoAssistidoAgent.ts`;
+- `tests/booking/manual-assisted/booking-agendamento-assistido.spec.ts`.
 
-Para testes automaticos (regressao, e2e):
-- CAPTCHA_MODE=disabled (se em QA controlado)
-- OU aguardar solucao de CAPTCHA automatizado
-- OU usar allowlist em ambiente de QA
+Fluxo esperado:
 
-## Regras de Dry Run
+- localização;
+- posto;
+- CAPTCHA;
+- dados do requerente;
+- data;
+- horário;
+- resumo;
+- código;
+- confirmação;
+- protocolo;
+- evidências.
 
-Quando CIDADAO_SMART_DRY_RUN=true:
-- parar no resumo
-- validar dados
-- nao confirmar solicitacao real
-- nao cancelar agendamento real
+### Pacote 4 - Regressão
 
-## Comandos de Execucao
+Depois que o assistido rodar, quebrar em testes menores:
 
-Instalar dependencias:
+- `tests/booking/public/agendamento-local.spec.ts`;
+- `tests/booking/public/dados-requerente.spec.ts`;
+- `tests/booking/public/data-hora.spec.ts`;
+- `tests/booking/public/resumo.spec.ts`;
+- `tests/booking/public/autenticacao.spec.ts`;
+- `tests/booking/public/confirmacao.spec.ts`.
 
-npm install
+## Projeto Legado
 
-Instalar browsers:
+Automation Exercise deve ficar somente em:
 
-npx playwright install
+```text
+legacy/automation-exercise/
+```
 
-Listar testes:
+Esse conteúdo serve como referência didática e não deve entrar na execução principal do Booking / Cidadão Smart.
 
-npx playwright test --list
+Não criar novos testes Booking dentro da estrutura legacy.
 
-Executar tudo (apenas testes automaticos, sem manual-assisted):
+## Git e Publicação
 
-npm run test:all
+Antes de commit/push:
 
-Executar em headed:
+1. Conferir `git status`.
+2. Garantir que `.env.local`, evidências e logs não estão staged.
+3. Rodar validações possíveis.
+4. Informar falhas conhecidas.
+5. Pedir aprovação quando houver alteração relevante.
 
-npm run test:headed
+Não fazer commit para esconder falha.
 
-DEMOS E TESTES ASSISTIDOS (requerem intervencao manual):
+## Relatório
 
-Executar demo completa de agendamento:
+Todo relatório de execução deve conter:
 
-npm run test:demo:agendamento
-
-Executar demo passo a passo:
-
-npm run test:demo:passo-a-passo
-
-TESTES DE REGRESSAO - AGENDAMENTO PRESENCIAL:
-
-Executar todos os testes de agendamento presencial:
-
-npm run test:agendamento
-
-Executar validacoes de localizacao:
-
-npx playwright test tests/agendamento-presencial/local.spec.ts --headed
-
-Executar validacoes de data e hora:
-
-npx playwright test tests/agendamento-presencial/data-hora.spec.ts --headed
-
-Executar validacoes de requerente:
-
-npx playwright test tests/agendamento-presencial/validacoes-requerente.spec.ts --headed
-
-Executar validacoes de resumo:
-
-npx playwright test tests/agendamento-presencial/resumo.spec.ts --headed
-
-TESTES DE REGRESSAO - EMISSAO ONLINE:
-
-Executar todos os testes de emissao online:
-
-npm run test:emissao
-
-Executar captura:
-
-npm run test:emissao:captura
-
-Executar resumo:
-
-npm run test:emissao:resumo
-
-TESTES DE REGRESSAO - CONSULTAS:
-
-Executar consulta de pedido:
-
-npx playwright test tests/consulta/consulta-pedido.spec.ts --headed
-
-Executar consulta de agendamento:
-
-npx playwright test tests/consulta/consulta-agendamento.spec.ts --headed
-
-TESTES DE REGRESSAO - 2VIA:
-
-Executar 2via expressa:
-
-npx playwright test tests/2via/2via-expressa.spec.ts --headed
-
-Executar 2via com alteracoes:
-
-npx playwright test tests/2via/2via-alteracoes.spec.ts --headed
-
-TESTES DE INTEGRACAO - API:
-
-Executar testes de API (notificador GBDS):
-
-npx playwright test tests/api/notificador-gbds.spec.ts --headed
-
-TESTES E2E - FLUXOS COMPLETOS:
-
-Executar todos os E2E:
-
-npm run test:e2e
-
-Executar E2E de agendamento presencial:
-
-npx playwright test tests/e2e/agendamento-presencial-fluxo-completo.spec.ts --headed
-
-Executar E2E de emissao online:
-
-npx playwright test tests/e2e/emissao-online-fluxo-completo.spec.ts --headed
-
-MODO DEBUG E DESENVOLVIMENTO:
-
-Abrir Playwright Inspector:
-
-npm run test:debug
-
-Abrir Playwright Test UI:
-
-npm run test:ui
-
-Gerar relatorios:
-
-npm run report
-
-## Fluxo de trabalho
-
-Fluxo de trabalho obrigatório:
-1. Ler história ou requisito
-2. Extrair critérios de aceitação
-3. Gerar plano de teste em specs/
-4. Explorar fluxo quando necessário
-5. Gerar ou atualizar testes em tests/
-6. Executar testes
-7. Curar apenas falhas técnicas
-8. Gerar relatório em test-results/
-9. Pedir aprovação antes de commit
-
-## Regras de correção técnica
-
-Pode corrigir:
-- seletor quebrado
-- espera e timing
-- asserção de rota
-- import ausente
-- formatação de massa de teste
-- método de Page Object
-
-Não pode corrigir:
-- mudando expectativa de negócio
-- removendo asserções para passar
-- pulando passo sem justificativa
-- confirmando ou cancelando fluxo real sem aprovação
-
-## Regra de Relatorio
-
-Todo relatorio deve conter:
-- feature
-- ambiente
-- comando executado
-- status
-- cenarios aprovados
-- cenarios falhos
-- cenarios bloqueados
-- caminhos de evidencia
-- bugs encontrados
-- proxima acao sugerida
+- feature;
+- ambiente;
+- comando executado;
+- status;
+- cenários aprovados;
+- cenários falhos;
+- cenários bloqueados;
+- caminhos de evidência;
+- bugs encontrados;
+- classificação provável da falha;
+- próxima ação sugerida.

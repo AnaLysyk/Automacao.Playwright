@@ -11,9 +11,13 @@ export type EnvConfig = {
   cidadaoSmartBaseUrl: string;
   bookingAdminBaseUrl: string;
   smartReactUrl: string;
+  smartBaseUrl: string;
+  apiBaseUrl: string;
+  apiToken?: string;
   captchaMode: CaptchaMode;
   executionMode: ExecutionMode;
   slowMo: number;
+  evidenceDir: string;
   dryRun: boolean;
 };
 
@@ -62,9 +66,13 @@ export function loadEnvConfig(): EnvConfig {
     cidadaoSmartBaseUrl: normalizeUrl(process.env.CIDADAO_SMART_BASE_URL || defaults.cidadaoSmartBaseUrl),
     bookingAdminBaseUrl: normalizeUrl(process.env.BOOKING_ADMIN_BASE_URL || defaults.bookingAdminBaseUrl),
     smartReactUrl: normalizeUrl(process.env.SMART_REACT_URL || process.env.SMART_BASE_URL || defaults.smartReactUrl),
+    smartBaseUrl: normalizeUrl(process.env.SMART_BASE_URL || process.env.SMART_REACT_URL || defaults.smartReactUrl),
+    apiBaseUrl: normalizeUrl(process.env.API_BASE_URL || ''),
+    apiToken: process.env.API_TOKEN || '',
     captchaMode: readCaptchaMode(),
     executionMode: readExecutionMode(),
     slowMo: readNumber('PW_SLOW_MO', 300),
+    evidenceDir: process.env.EVIDENCE_DIR || 'test-results',
     dryRun: (process.env.CIDADAO_SMART_DRY_RUN || 'false').trim().toLowerCase() === 'true',
   };
 }

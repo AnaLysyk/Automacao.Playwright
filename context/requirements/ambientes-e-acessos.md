@@ -567,9 +567,9 @@ Este documento se relaciona com:
 - context/requirements/api-cidadao-booking.md
 - context/requirements/known-issues.md
 - context/requirements/regras-criticas.md
-- docs/GUIA_EXECUCAO.md
+- docs/GUIA_DE_EXECUCAO.md
 - docs/EVIDENCIAS_E_RELATORIOS.md
-- docs/GUIA_ANALISE_FALHAS.md
+- docs/GUIA_DE_ANALISE_DE_FALHAS.md
 
 ## 21. Status deste documento
 
