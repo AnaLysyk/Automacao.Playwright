@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Deixar o repositorio pronto para demo, com foco em Playwright e fluxo agentico.
+Deixar o repositorio pronto para demo, com foco em Playwright e fluxo de QA estruturado.
 
 ## Ajustes realizados
 

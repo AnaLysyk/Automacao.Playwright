@@ -30,6 +30,23 @@ Servir como referência técnica para:
 
 📍 Para isso, veja: `context/test-cases/booking-agendamento-presencial.json` ou specs em `tests/booking/`
 
+## 3.1. Ambientes recomendados para Agendamento Presencial
+
+- **146**: ambiente preferido para automação de Agendamento Presencial. Deve ser usado para criação, validação e execução de fluxos completos com maior tolerância a alterações de dados.
+- **201**: ambiente de confirmação / pré-produção. Use para validações conservadoras de leitura, consistência de exibição e regressões que não geram agendamentos reais sempre que possível.
+- **200**: ambiente de integração GBDS/MIR. Normalmente não usado diretamente para testes de agendamento, exceto para validações de backend e integrações de notificador.
+
+**Configurações chave**
+- `TARGET_ENV` no `.env.local` deve identificar o ambiente ativo.
+- `CIDADAO_SMART_BASE_URL` deve apontar para a URL do frontend Cidadão Smart do ambiente selecionado.
+- `BOOKING_ADMIN_BASE_URL` deve apontar para o painel administrativo Booking/Admin correspondente.
+- `SMART_BASE_URL` é o endereço do SMART interno usado para processamento e conferência.
+
+**Recomendações práticas**
+- Sempre valide manualmente que as URLs acessam antes de iniciar os testes.
+- Em `201`, prefira consultas e checkpoints em vez de ações que criem ou modifiquem dados.
+- Use `CIDADAO_SMART_DRY_RUN=true` para evitar enviar agendamentos reais em fluxos de demonstração.
+
 ## 4. Contexto Funcional
 
 ### O que é o Booking

@@ -42,6 +42,29 @@ export class CidadaoSmartAgendamentoResumoPage {
     await expect(this.page.getByText(dados.endereco)).toBeVisible();
   }
 
+  async validarDadosBasicosResumo(dados: Pick<DadosResumoAgendamento, 'nome' | 'email' | 'telefone'>): Promise<void> {
+    await expect(this.page.getByText(S.tituloResumo)).toBeVisible();
+    await expect(this.page.getByText(dados.nome)).toBeVisible();
+    await expect(this.page.getByText(dados.email)).toBeVisible();
+    await expect(this.page.getByText(dados.telefone)).toBeVisible();
+  }
+
+  async obterPostoAtendimentoVisivel(): Promise<string | undefined> {
+    for (const servicePoint of cidadaoSmartServicePoints) {
+      const locator = this.page.getByText(servicePoint.nome).first();
+      if ((await locator.count()) > 0 && (await locator.isVisible().catch(() => false))) {
+        return servicePoint.nome;
+      }
+    }
+
+    const aeroporto = this.page.getByText(/aeroporto/i).first();
+    if ((await aeroporto.count()) > 0 && (await aeroporto.isVisible().catch(() => false))) {
+      return (await aeroporto.innerText()).trim();
+    }
+
+    return undefined;
+  }
+
   async validarPostoSelecionado(servicePoint: ServicePoint): Promise<void> {
     await expect(this.page.getByText(servicePoint.nome)).toBeVisible();
     await expect(this.page.getByText(servicePoint.enderecoParcial)).toBeVisible();

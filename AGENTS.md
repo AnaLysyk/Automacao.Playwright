@@ -4,14 +4,14 @@
 
 Este repositorio demonstra automacao E2E com Playwright para o Cidadao Smart, com foco em apresentacao para Griaule.
 
-Fluxo agentico esperado:
+Fluxo esperado:
 - ler requisito
 - planejar testes
-- gerar automacao Playwright
+- gerar automação Playwright
 - executar testes
-- salvar evidencias
-- gerar relatorio
-- sugerir correcao tecnica quando houver falha
+- salvar evidências
+- gerar relatório
+- sugerir correção técnica quando houver falha
 
 ## Escopo Principal
 
@@ -37,9 +37,9 @@ Pastas oficiais:
 - context/requirements/* para regras de negocio
 - context/user-stories/* para historias
 - context/test-cases/* para repositorio de casos
-- prompts/* para prompts dos agentes
+- prompts/* para prompts de execução
 - specs/* para planos de teste gerados
-- test-results/* para artefatos de execucao
+- test-results/* para artefatos de execução
 
 ## Regras de Implementacao Playwright
 
@@ -370,34 +370,34 @@ Gerar relatorios:
 
 npm run report
 
-## Workflow dos Agentes
+## Fluxo de trabalho
 
-Lifecycle obrigatorio:
-1. Ler historia ou requisito
-2. Extrair criterios de aceite
+Fluxo de trabalho obrigatório:
+1. Ler história ou requisito
+2. Extrair critérios de aceitação
 3. Gerar plano de teste em specs/
-4. Explorar fluxo quando necessario
+4. Explorar fluxo quando necessário
 5. Gerar ou atualizar testes em tests/
 6. Executar testes
-7. Curar apenas falhas tecnicas
-8. Gerar relatorio em test-results/
-9. Pedir aprovacao antes de commit
+7. Curar apenas falhas técnicas
+8. Gerar relatório em test-results/
+9. Pedir aprovação antes de commit
 
-## Restricoes do Healer
+## Regras de correção técnica
 
 Pode corrigir:
 - seletor quebrado
 - espera e timing
-- assercao de rota
+- asserção de rota
 - import ausente
-- formatacao de massa de teste
-- metodo de Page Object
+- formatação de massa de teste
+- método de Page Object
 
-Nao pode corrigir:
-- mudando expectativa de negocio
-- removendo assercoes para passar
+Não pode corrigir:
+- mudando expectativa de negócio
+- removendo asserções para passar
 - pulando passo sem justificativa
-- confirmando ou cancelando fluxo real sem aprovacao
+- confirmando ou cancelando fluxo real sem aprovação
 
 ## Regra de Relatorio
 

@@ -283,7 +283,7 @@ README_NOVO.md (início)
 - [ ] PLANO_AUTOMACAO_CIDADAO_BOOKING_SMART.md
 - [ ] SEGURANCA_CREDENCIAIS.md
 - [ ] INDICE_NAVEGACAO_COMPLETO.md
-- [ ] AGENTES.md
+- [ ] AGENTS.md
 
 ### Referência (Consultar)
 - [ ] PROGRESSO_SESSAO.md

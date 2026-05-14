@@ -53,11 +53,11 @@ Suíte completa de testes automatizados para a plataforma Cidadão Smart com int
    - Sistema de tags
    - CI/CD boundaries
 
-### 🤖 Agentes & Workflows
+### Workflows & Automação
 
 8. **[AGENTS.md](AGENTS.md)**
-   - Workflow de agentes
-   - Como usar diferentes agentes
+   - Workflow de automação
+   - Como usar diferentes papéis
    - Regras de automação
 
 ---

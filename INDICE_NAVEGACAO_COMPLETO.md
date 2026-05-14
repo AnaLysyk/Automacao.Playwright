@@ -97,12 +97,12 @@ Use este arquivo para navegar a documentação rapidamente.
     └─ Quick reference
 ```
 
-### 🤖 Workflows & Automação
+### Workflows & Automação
 
 ```
 11. AGENTS.md
-    ├─ Workflow de agentes
-    ├─ Como usar agentes
+    ├─ Workflow de automação
+    ├─ Como usar diferentes papéis
     └─ Regras de automação
 ```
 

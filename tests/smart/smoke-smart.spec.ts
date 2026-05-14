@@ -126,8 +126,7 @@ test.describe('@smart @smoke', () => {
     await expect(table).toBeVisible();
 
     // Deve ter pelo menos uma linha (processo)
-    const rows = page.locator('tbody tr, [role="row"]').all();
-    const rowCount = await rows.length;
+    const rowCount = await page.locator('tbody tr, [role="row"]').count();
     expect(rowCount).toBeGreaterThan(0);
   });
 

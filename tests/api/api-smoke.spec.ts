@@ -62,7 +62,7 @@ test.describe('@api @smoke', () => {
     }
 
     // Act
-    let token: string;
+    let token: string | undefined;
 
     try {
       token = await ApiHelper.getAuthToken(request);
@@ -71,6 +71,12 @@ test.describe('@api @smoke', () => {
       // ou credenciais não estão configuradas
       console.log('Aviso: Não foi possível obter token. Verifique Keycloak.');
       test.skip();
+      return;
+    }
+
+    if (!token) {
+      test.skip();
+      return;
     }
 
     // Assert

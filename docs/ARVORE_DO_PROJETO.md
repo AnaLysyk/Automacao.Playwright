@@ -6,9 +6,9 @@
 - tests/pages/: page objects
 - tests/pages/selectors/: seletores centralizados
 - tests/support/: utilitarios de teste
-- prompts/: prompts dos agentes
+- prompts/: prompts de execução
 - specs/: planos de teste
-- test-results/: evidencias e relatorios
+- test-results/: evidências e relatórios
 - docs/: documentacao de apoio
 
 ## Regra

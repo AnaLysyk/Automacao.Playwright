@@ -1,17 +1,17 @@
 ﻿# Projeto Demo Playwright - Cidadao Smart
 
-Repositorio de demonstracao de automacao E2E com Playwright, focado em mostrar um fluxo agentico de QA para a Griaule.
+Repositório de demonstração de automação E2E com Playwright para o Cidadão Smart, com foco em validação técnica e apresentação para a Griaule.
 
 ## Objetivo da Demo
 
-Mostrar, de ponta a ponta, que um fluxo com IA consegue:
+Mostrar, de ponta a ponta, que um fluxo estruturado de QA consegue:
 1. ler requisito
 2. planejar testes
-3. gerar automacao Playwright
+3. gerar automação Playwright
 4. executar testes
-5. salvar evidencia
-6. gerar relatorio
-7. sugerir correcao tecnica quando falhar
+5. salvar evidência
+6. gerar relatório
+7. sugerir correção técnica quando houver falha
 
 ## Escopo Atual
 
@@ -25,9 +25,9 @@ Mostrar, de ponta a ponta, que um fluxo com IA consegue:
 - tests/pages/: page objects
 - tests/pages/selectors/: seletores
 - tests/support/: dados, rotas, timeouts, relatorios
-- prompts/: prompts por papel de agente
+- prompts/: prompts de execução
 - specs/: planos de teste gerados
-- test-results/: evidencias e relatorios
+- test-results/: evidências e relatórios
 - docs/: guias e materiais de apresentacao
 
 ## Pre-requisitos
@@ -100,6 +100,6 @@ Se houver divergencia de posto, o teste deve falhar e o resultado deve ser class
 
 ## Referencias
 
-- Regras para agentes: AGENTS.md
+- Regras de execução: AGENTS.md
 - Guia de execucao: docs/GUIA_DE_EXECUCAO.md
-- Estrategia agentica: docs/ESTRATEGIA_AGENTIC_QA.md
+- Estratégia de QA: docs/ESTRATEGIA_QA.md

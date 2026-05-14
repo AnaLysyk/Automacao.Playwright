@@ -1,10 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { AuthHelper } from '../helpers/AuthHelper';
 
 const BOOKING_ADMIN_BASE_URL = process.env.BOOKING_ADMIN_BASE_URL || 'http://localhost:3000';
 
 test.describe('@smoke @booking-admin @readonly', () => {
-  let page;
+  let page: Page;
 
   test.beforeEach(async ({ page: testPage }) => {
     page = testPage;

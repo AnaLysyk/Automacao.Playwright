@@ -12,6 +12,13 @@
     "test:regressao": "playwright test tests/agendamento-presencial tests/emissao-online tests/consulta tests/2via tests/api --headed --project=chromium",
     "test:e2e": "playwright test tests/e2e --headed --project=chromium",
     "test:demo": "playwright test tests/manual-assisted --headed --project=chromium",
+    "test:booking:assistido": "playwright test tests/booking/manual-assisted/booking-agendamento-assistido.spec.ts --headed --project=chromium",
+    "test:booking:debug": "playwright test tests/booking/manual-assisted/booking-agendamento-assistido.spec.ts --debug --project=chromium",
+    "test:booking:public": "playwright test tests/booking/public --headed --project=chromium",
+    "test:booking:e2e": "playwright test tests/booking/e2e --headed --project=chromium",
+    "test:admin:readonly": "playwright test tests/booking-admin/read-only --headed --project=chromium",
+    "test:admin:write": "playwright test tests/booking-admin/write --headed --project=chromium",
+    "test:api:booking": "playwright test tests/api/booking --project=chromium",
     "test:api": "playwright test tests/api --headed --project=chromium",
     
     "test:all": "playwright test tests/smoke tests/agendamento-presencial tests/emissao-online tests/consulta tests/2via tests/api tests/e2e --project=chromium",
