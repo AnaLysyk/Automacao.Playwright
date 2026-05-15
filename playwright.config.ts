@@ -93,8 +93,29 @@ export default defineConfig({
     {
       name: 'mobile-chromium',
       use: {
-        // Perfil mobile web para validar responsividade do Booking/Cidadao Smart.
+        // Alias legado para execucoes mobile ja existentes.
         ...devices['Pixel 5'],
+      },
+    },
+    {
+      name: 'mobile-pixel-7',
+      use: {
+        // Android comum com viewport intermediario.
+        ...devices['Pixel 7'],
+      },
+    },
+    {
+      name: 'mobile-galaxy-s24',
+      use: {
+        // Android Samsung popular para validar layout estreito.
+        ...devices['Galaxy S24'],
+      },
+    },
+    {
+      name: 'mobile-iphone-15',
+      use: {
+        // iOS/Safari mobile para cobrir comportamento WebKit.
+        ...devices['iPhone 15'],
       },
     },
   ],

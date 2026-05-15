@@ -1,0 +1,15 @@
+export const CidadaoSmartEmissaoCpfPageSelectors = {
+  route: /\/emitir\/?$/,
+  titulo: /autentica..o cpf|autenticacao cpf/i,
+  campoCpfPlaceholder: /000\.000\.000-00|cpf/i,
+  campoEmail: /e-mail|email/i,
+  campoTelefone: /telefone celular|telefone/i,
+  campoCodigo: /c.digo de verifica..o|codigo de verificacao|c.digo de seguran.a|codigo de seguranca/i,
+  botaoVoltar: /voltar/i,
+  botaoProsseguir: /prosseguir|continuar/i,
+  botaoVerificar: /verificar/i,
+  linkNaoLembroCpf: /n.o lembro o meu cpf|nao lembro o meu cpf/i,
+  mensagemCodigoEnviado: /enviamos um c.digo|codigo de verifica..o/i,
+  mensagemCodigoValidado: /c.digo de verifica..o validado|codigo de verificacao validado|j. pode prosseguir/i,
+  erroCaptcha: /complete a verifica..o do recaptcha|complete a verificacao do recaptcha/i,
+};

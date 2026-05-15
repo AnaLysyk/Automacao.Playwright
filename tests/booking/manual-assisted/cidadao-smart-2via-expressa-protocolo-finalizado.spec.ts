@@ -1,9 +1,10 @@
-import { expect, Locator, Page, test } from '@playwright/test';
-import { obterUltimoProtocoloGerado, ProtocoloGerado } from '../../support/reports/protocolos';
-
-function baseUrl(): string {
-  return (process.env.CIDADAO_SMART_BASE_URL || 'https://172.16.1.146').replace(/\/+$/, '');
-}
+import { expect, Page, test } from '@playwright/test';
+import { CidadaoSmartEmissaoCpfPage } from '../../pages/CidadaoSmartEmissaoCpfPage';
+import { CidadaoSmartEmissaoTipoPage } from '../../pages/CidadaoSmartEmissaoTipoPage';
+import { CidadaoSmartEmissaoResumoPage } from '../../pages/CidadaoSmartEmissaoResumoPage';
+import { handleCaptcha } from '../../support/captcha/handleCaptcha';
+import { obterUltimoProtocoloGerado, ProtocoloGerado, salvarProtocoloGerado } from '../../support/reports/protocolos';
+import { bookingAgendamentoData } from '../../data/bookingAgendamentoData';
 
 function ultimoFinalizado(): ProtocoloGerado {
   // Usa protocolo finalizado real quando existir; caso contrario usa massa finalizada do .env.local.
@@ -34,57 +35,6 @@ function ultimoFinalizado(): ProtocoloGerado {
   } as ProtocoloGerado;
 }
 
-async function primeiroVisivel(locators: Locator[]): Promise<Locator> {
-  for (const locator of locators) {
-    if (await locator.isVisible({ timeout: 2_000 }).catch(() => false)) return locator;
-  }
-
-  throw new Error('Campo esperado nao encontrado na tela de 2 via expressa.');
-}
-
-async function primeiroVisivelOpcional(locators: Locator[]): Promise<Locator | null> {
-  for (const locator of locators) {
-    if (await locator.isVisible({ timeout: 1_000 }).catch(() => false)) return locator;
-  }
-
-  return null;
-}
-
-async function preencherNascimentoSeDisponivel(page: Page, nascimento?: string): Promise<void> {
-  // Preenche nascimento apenas se a tela pedir esse segundo fator de localizacao.
-  if (!nascimento) return;
-
-  const campoNascimento = await primeiroVisivelOpcional([
-    page.getByLabel(/data de nascimento|nascimento/i).first(),
-    page.getByPlaceholder(/dd\/mm\/aaaa|data de nascimento|nascimento/i).first(),
-    page.locator('input[name*="nascimento" i], input[id*="nascimento" i], input[placeholder*="dd/mm/aaaa" i]').first(),
-  ]);
-
-  if (campoNascimento) {
-    await campoNascimento.fill(nascimento);
-  }
-}
-
-async function preencherCpfEBuscar(page: Page, cpf: string, nascimento?: string): Promise<void> {
-  const campoCpf = await primeiroVisivel([
-    page.getByLabel(/cpf/i).first(),
-    page.getByPlaceholder(/cpf|000\.000\.000-00/i).first(),
-    page.locator('input[name*="cpf" i], input[id*="cpf" i]').first(),
-    page.locator('input').first(),
-  ]);
-
-  await campoCpf.fill(cpf);
-  await preencherNascimentoSeDisponivel(page, nascimento);
-
-  const botaoBuscar = await primeiroVisivel([
-    page.getByRole('button', { name: /buscar|consultar|prosseguir/i }).first(),
-    page.locator('button[type="submit"]').first(),
-  ]);
-
-  await botaoBuscar.click();
-  await page.waitForLoadState('networkidle').catch(() => undefined);
-}
-
 async function validarTextoOuValor(page: Page, valor: string): Promise<void> {
   const texto = page.getByText(valor).first();
   if (await texto.isVisible({ timeout: 3_000 }).catch(() => false)) return;
@@ -100,27 +50,85 @@ async function validarTextoOuValor(page: Page, valor: string): Promise<void> {
     .toBe(true);
 }
 
+async function capturarProtocoloDaEmissao(page: Page): Promise<string> {
+  const texto = await page.locator('body').innerText();
+  const protocolo = texto.match(/0\d{11,}/)?.[0];
+
+  if (!protocolo) {
+    throw new Error('Protocolo da emissao expressa nao encontrado na tela de sucesso.');
+  }
+
+  return protocolo;
+}
+
 test.describe('@2via @expressa @encadeado', () => {
   test('deve reaproveitar dados do protocolo finalizado', async ({ page }) => {
-    // Valida que a 2a via expressa reaproveita os dados do processo finalizado.
+    test.setTimeout(30 * 60 * 1000);
+
+    // Valida que a emissao expressa usa o processo finalizado como base.
     const protocolo = ultimoFinalizado();
+    const email = protocolo.email || process.env.CIDADAO_SMART_2VIA_EXPRESSA_EMAIL || bookingAgendamentoData.email;
+    const telefone = protocolo.telefone || process.env.CIDADAO_SMART_2VIA_EXPRESSA_TELEFONE || bookingAgendamentoData.telefone;
+    const cpfPage = new CidadaoSmartEmissaoCpfPage(page);
+    const tipoPage = new CidadaoSmartEmissaoTipoPage(page);
+    const resumoPage = new CidadaoSmartEmissaoResumoPage(page);
 
-    await page.goto(`${baseUrl()}/agendamentos/2via-expressa`);
+    await cpfPage.acessar();
+    if (await cpfPage.estaNaTelaCpf()) {
+      await cpfPage.validarTelaCpf();
+      await cpfPage.preencherCpf(protocolo.cpf as string);
+      await handleCaptcha(page);
+      await cpfPage.prosseguirAutenticacaoAtual();
+    }
 
-    const telaDisponivel = await page
-      .getByText(/2a via|2.? via|segunda via|cpf/i)
-      .first()
-      .isVisible({ timeout: 5_000 })
-      .catch(() => false);
+    await cpfPage.preencherContatoSeNecessario(email, telefone);
+    await cpfPage.tratarCodigoSeNecessario();
+    await cpfPage.prosseguirParaTipoEmissao();
 
-    test.skip(!telaDisponivel, `Tela de 2 via expressa indisponivel neste ambiente. URL atual: ${page.url()}`);
+    await tipoPage.validarTelaTipoEmissao();
+    await tipoPage.selecionarReimpressao();
+    await tipoPage.prosseguir();
 
-    await preencherCpfEBuscar(page, protocolo.cpf as string, protocolo.dataNascimento);
+    const rotaEsperada = /\/emitir\/(captura|resumo|validacao-documentos|valida-documentos|instrucoes-foto|sucesso)/i;
+    await page.waitForURL(rotaEsperada, { timeout: 60_000 }).catch(() => undefined);
+    expect(page.url()).toMatch(rotaEsperada);
 
-    if (protocolo.nome) await validarTextoOuValor(page, protocolo.nome);
-    if (protocolo.dataNascimento) await validarTextoOuValor(page, protocolo.dataNascimento);
-    if (protocolo.email) await validarTextoOuValor(page, protocolo.email);
-    if (protocolo.telefone) await validarTextoOuValor(page, protocolo.telefone);
+    if (/\/emitir\/resumo/i.test(page.url())) {
+      await resumoPage.validarTelaResumo();
+      if (protocolo.cpf) await validarTextoOuValor(page, protocolo.cpf);
+      if (protocolo.nome) await validarTextoOuValor(page, protocolo.nome);
+      if (
+        protocolo.dataNascimento &&
+        (await page.getByText(/data de nascimento|nascimento/i).first().isVisible({ timeout: 1_000 }).catch(() => false))
+      ) {
+        await validarTextoOuValor(page, protocolo.dataNascimento);
+      }
+      if (protocolo.email) await validarTextoOuValor(page, protocolo.email);
+      if (protocolo.telefone) await validarTextoOuValor(page, protocolo.telefone);
+      await resumoPage.validarProsseguirDesabilitado();
+      await resumoPage.marcarAceite();
+      await resumoPage.validarProsseguirHabilitado();
+    }
+
+    if (/\/emitir\/sucesso/i.test(page.url())) {
+      const protocoloExpressa = await capturarProtocoloDaEmissao(page);
+      salvarProtocoloGerado({
+        fluxo: 'cidadao-smart-2via-expressa',
+        ambiente: process.env.CIDADAO_SMART_BASE_URL || 'nao-configurado',
+        postoSelecionado: 'emissao-online',
+        protocolo: protocoloExpressa,
+        status: 'EXPRESSA_SUBMITTED',
+        cpf: protocolo.cpf,
+        dataNascimento: protocolo.dataNascimento,
+        email,
+        telefone,
+        dataExecucao: new Date().toISOString(),
+      });
+      test.info().annotations.push({
+        type: 'protocolo-expressa',
+        description: protocoloExpressa,
+      });
+    }
 
     test.info().annotations.push({
       type: 'protocolo-base',

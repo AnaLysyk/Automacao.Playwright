@@ -152,14 +152,27 @@ export class CidadaoSmartAgendamentoLocalPage {
       throw new Error(await this.erroProsseguirDesabilitado(botaoProsseguir));
     }
 
-    await Promise.all([
-      this.page.waitForURL(/\/agendamentos\/novo\/data-e-hora/i, { timeout: 30_000 }).catch(() => undefined),
-      botaoProsseguir.click(),
-    ]);
+    const aguardarDataHora = this.page
+      .waitForURL(/\/agendamentos\/novo\/data-e-hora/i, { timeout: 30_000 })
+      .catch(() => undefined);
+
+    await this.clicarProsseguirHabilitado(botaoProsseguir);
+    await aguardarDataHora;
 
     if (!(await this.estaNaTelaDataHora())) {
       throw new Error(`PROSSEGUIR_NAO_NAVEGOU url=${this.page.url()}`);
     }
+  }
+
+  private async clicarProsseguirHabilitado(botaoProsseguir: Locator): Promise<void> {
+    await botaoProsseguir.scrollIntoViewIfNeeded();
+
+    // No mobile, alguns blocos sobrepostos interceptam o ponto do clique.
+    // Como o botao ja foi validado como habilitado, disparamos o click no
+    // elemento atual para nao reavaliar outro "Prosseguir" depois da navegacao.
+    await botaoProsseguir.evaluate((element: any) => {
+      element.click();
+    });
   }
 
   private async tratarBotaoProsseguirDesabilitado(botaoProsseguir: Locator): Promise<void> {

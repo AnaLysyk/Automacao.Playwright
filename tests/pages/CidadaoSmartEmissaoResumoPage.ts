@@ -14,8 +14,8 @@ export class CidadaoSmartEmissaoResumoPage {
     await expect(this.page.getByText(S.tituloDadosRequerente)).toBeVisible();
     await expect(this.page.getByText(S.tituloLocalRetirada)).toBeVisible();
     await expect(this.page.getByText(S.horarioAtendimento)).toBeVisible();
-    await expect(this.page.getByText(S.emailPosto)).toBeVisible();
-    await expect(this.page.getByText(S.telefonePosto)).toBeVisible();
+    await expect(this.page.getByText(S.emailPosto).first()).toBeVisible();
+    await expect(this.page.getByText(S.telefonePosto).first()).toBeVisible();
     await expect(this.page.getByRole('checkbox', { name: S.aceite })).toBeVisible();
     await expect(this.page.getByRole('button', { name: S.botaoVoltar })).toBeVisible();
     await expect(this.page.getByRole('button', { name: S.botaoProsseguir })).toBeVisible();
