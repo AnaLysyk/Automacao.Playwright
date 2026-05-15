@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "paths": {
-      "@support/*": ["./tests/_support/*"],
+      "@support/*": ["./support/*"],
       "@tests/*": ["./tests/*"]
     },
     "strict": true,
@@ -19,7 +19,7 @@
   },
   "include": [
     "playwright.config.ts",
-    "tests/**/*.ts",
-    "scripts/**/*.ts"
+    "support/**/*.ts",
+    "tests/**/*.ts"
   ]
 }

@@ -1,24 +1,21 @@
 node_modules/
-playwright-report/
 test-results/
+playwright-report/
+blob-report/
 .runtime/
 .auth/
 playwright/.auth/
+playwright/.profiles/
 .env
-.env.local
-*.log
-debug.log
+.env.*
+!.env.example
 .DS_Store
+.vscode/
 dist/
 coverage/
+*.log
 
-# Midia local usada em POCs de captura. Nao versionar rostos, videos ou massa sensivel.
-fixtures/media/source/*
-!fixtures/media/source/.gitkeep
-fixtures/media/*.y4m
-fixtures/media/*.mp4
-fixtures/media/*.png
-fixtures/media/*.jpg
-fixtures/media/*.jpeg
-fixtures/media/*.webp
-!fixtures/media/.gitkeep
+assets/imagens/*
+!assets/imagens/.gitkeep
+assets/documentos/*
+!assets/documentos/.gitkeep

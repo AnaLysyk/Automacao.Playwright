@@ -2,48 +2,18 @@ import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Eu carrego primeiro o .env.local para respeitar a configuração da máquina.
 dotenv.config({ path: '.env.local' });
 dotenv.config();
 
-const automatedRunScripts = new Set([
-  'test:all',
-  'test:ci',
-  'test:regressao',
-  'test:booking:public',
-  'test:booking:e2e',
-  'test:agendamento',
-  'test:agendamento:local',
-  'test:agendamento:data-hora',
-  'test:agendamento:validacoes',
-  'test:emissao',
-  'test:consulta',
-  'test:2via',
-  'test:e2e',
-  'test:smoke',
-]);
-
-// Scripts automaticos nao devem parar em page.pause().
-// Fluxos com intervencao humana continuam nos comandos manual-assisted.
-if (automatedRunScripts.has(process.env.npm_lifecycle_event || '') || process.env.CI) {
-  if ((process.env.CAPTCHA_MODE || 'manual') === 'manual') {
-    process.env.CAPTCHA_MODE = 'disabled';
-  }
-
-  if ((process.env.EXECUTION_MODE || 'manual-assisted') === 'manual-assisted') {
-    process.env.EXECUTION_MODE = 'ci';
-  }
-}
-
-// Eu uso PW_SLOW_MO para deixar a execução assistida mais visual.
+const headless = (process.env.HEADLESS || 'true').trim().toLowerCase() !== 'false';
 const slowMo = Number(process.env.PW_SLOW_MO || 0);
-const executionMode = process.env.EXECUTION_MODE || 'manual-assisted';
-const isManualAssisted = executionMode === 'manual-assisted';
-const evidenceDir = process.env.EVIDENCE_DIR || 'test-results';
 const captureMode = process.env.CAPTURE_MODE || 'manual';
 const fakeVideoPath = process.env.CAMERA_FAKE_VIDEO_PATH || '';
+const baseURL =
+  process.env.CIDADAO_SMART_BASE_URL ||
+  process.env.BOOKING_BASE_URL ||
+  'http://localhost';
 
-// Eu ativo a câmera fake somente quando o modo de captura pedir explicitamente.
 const chromiumArgs =
   captureMode === 'fake-video' && fakeVideoPath
     ? [
@@ -55,27 +25,25 @@ const chromiumArgs =
 
 export default defineConfig({
   testDir: './tests',
-  outputDir: evidenceDir,
+  outputDir: 'test-results',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
-  // Eu dou mais tempo para fluxos assistidos porque eles podem pausar em CAPTCHA/código.
-  timeout: isManualAssisted ? 180_000 : 120_000,
+  timeout: 120_000,
   expect: {
-    timeout: isManualAssisted ? 45_000 : 30_000,
+    timeout: 30_000,
   },
   reporter: [
-    ['html', { open: 'never' }],
     ['list'],
+    ['html', { open: 'never' }],
   ],
   use: {
-    // Eu deixo a URL base configurável para alternar entre 146, 201 ou outro ambiente.
-    baseURL: process.env.CIDADAO_SMART_BASE_URL || 'https://172.16.1.146',
+    baseURL,
+    headless,
     ignoreHTTPSErrors: true,
-    // Eu ligo mais evidências no modo assistido para facilitar demo e investigação.
-    trace: isManualAssisted ? 'on' : 'on-first-retry',
-    screenshot: isManualAssisted ? 'on' : 'only-on-failure',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     permissions: captureMode === 'fake-video' ? ['camera', 'microphone'] : [],
     launchOptions: {
@@ -88,34 +56,6 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-      },
-    },
-    {
-      name: 'mobile-chromium',
-      use: {
-        // Alias legado para execucoes mobile ja existentes.
-        ...devices['Pixel 5'],
-      },
-    },
-    {
-      name: 'mobile-pixel-7',
-      use: {
-        // Android comum com viewport intermediario.
-        ...devices['Pixel 7'],
-      },
-    },
-    {
-      name: 'mobile-galaxy-s24',
-      use: {
-        // Android Samsung popular para validar layout estreito.
-        ...devices['Galaxy S24'],
-      },
-    },
-    {
-      name: 'mobile-iphone-15',
-      use: {
-        // iOS/Safari mobile para cobrir comportamento WebKit.
-        ...devices['iPhone 15'],
       },
     },
   ],
