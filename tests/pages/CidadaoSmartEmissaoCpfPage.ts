@@ -1,12 +1,19 @@
 import { expect, Locator, Page } from '@playwright/test';
 import { CidadaoSmartEmissaoCpfPageSelectors as S } from './selectors/CidadaoSmartEmissaoCpfPageSelectors.ts';
 import { visualPause } from '../helpers/visualPause';
+import { loadEnvConfig } from '../config/env';
+import { ImapEmailCodeProvider } from '../providers/ImapEmailCodeProvider';
+import { GmailCodeProvider } from '../providers/GmailCodeProvider';
 
 export class CidadaoSmartEmissaoCpfPage {
+  private readonly env = loadEnvConfig();
+  private readonly imapProvider = new ImapEmailCodeProvider(this.env);
+  private readonly gmailProvider = new GmailCodeProvider(this.env);
+
   constructor(private readonly page: Page) {}
 
   /**
-   * Abre a autenticacao por CPF, que e a entrada real da emissao online.
+   * Abre a autenticação por CPF, que é a entrada real da emissão online.
    */
   async acessar(): Promise<void> {
     await this.page.goto('/emitir');
@@ -14,7 +21,7 @@ export class CidadaoSmartEmissaoCpfPage {
   }
 
   /**
-   * Confirma que a tela carregou com CPF, botoes principais e atalho sem CPF.
+   * Confirma que a tela carregou com CPF e botões principais.
    */
   async validarTelaCpf(): Promise<void> {
     await expect(await this.obterCampoCpf()).toBeVisible();
@@ -23,14 +30,19 @@ export class CidadaoSmartEmissaoCpfPage {
   }
 
   /**
-   * Preenche o CPF da massa finalizada sem gravar esse valor no codigo.
+   * Preenche o CPF da massa finalizada.
    */
   async preencherCpf(cpf: string): Promise<void> {
-    await (await this.obterCampoCpf()).fill(cpf);
+    const campoCpf = await this.obterCampoCpf();
+
+    await expect(campoCpf).toBeVisible();
+    await campoCpf.click();
+    await campoCpf.fill('');
+    await campoCpf.type(cpf, { delay: 60 });
   }
 
   /**
-   * Informa se a jornada ainda esta na entrada por CPF.
+   * Informa se a jornada ainda está na entrada por CPF.
    */
   async estaNaTelaCpf(): Promise<boolean> {
     return this.obterCampoCpf()
@@ -39,125 +51,313 @@ export class CidadaoSmartEmissaoCpfPage {
   }
 
   /**
-   * Preenche contato quando o backend pede e-mail e telefone antes do codigo.
+   * Clica em Prosseguir depois do CPF/CAPTCHA e aguarda a próxima tela real.
+   *
+   * Se o botão ainda estiver desabilitado, pausa para o QA confirmar se o CAPTCHA
+   * realmente foi resolvido antes de seguir.
    */
-  async preencherContatoSeNecessario(email: string, telefone: string): Promise<void> {
-    const campoEmail = await this.obterCampoEmailOpcional();
-    const campoTelefone = await this.obterCampoTelefoneOpcional();
+  async prosseguirAutenticacaoAtual(): Promise<void> {
+    const botaoProsseguir = this.page.getByRole('button', { name: S.botaoProsseguir }).first();
 
-    if (!campoEmail && !campoTelefone) {
-      return;
+    await expect(botaoProsseguir).toBeVisible({ timeout: 10_000 });
+
+    if (!(await botaoProsseguir.isEnabled().catch(() => false))) {
+      await visualPause(
+        this.page,
+        '[EMISSAO-EXPRESSA] O botão Prosseguir ainda está desabilitado. Resolva o CAPTCHA, confirme que o botão habilitou e clique em Resume.'
+      );
     }
 
-    if (!email || !telefone) {
-      throw new Error('EMISSAO_CONTATO_OBRIGATORIO: informe email e telefone para receber o codigo.');
-    }
+    await expect(botaoProsseguir).toBeEnabled({ timeout: 30_000 });
 
-    if (campoEmail) {
-      await campoEmail.fill(email);
-    }
+    const aguardarProximaRota = this.page
+      .waitForURL(/\/emitir\/(escolha-posto|autenticacao|tipo-emissao)/i, { timeout: 30_000 })
+      .catch(() => undefined);
 
-    if (campoTelefone) {
-      await campoTelefone.fill(telefone);
-    }
+    await this.clicarBotaoAtual(botaoProsseguir);
+    await aguardarProximaRota;
 
-    await this.clicarProsseguirAtual();
+    await this.page.waitForLoadState('domcontentloaded').catch(() => undefined);
   }
 
   /**
-   * Resolve a etapa de codigo por env ou por pausa manual assistida.
+   * Seleciona o posto de retirada quando o fluxo da emissão expressa exigir.
+   *
+   * Fluxo esperado:
+   * CPF/CAPTCHA -> escolha de posto -> autenticação por e-mail/telefone.
+   */
+  async selecionarPostoRetiradaSeNecessario(): Promise<void> {
+    await this.page
+      .waitForURL(/\/emitir\/escolha-posto/i, { timeout: 15_000 })
+      .catch(() => undefined);
+
+    if (!/\/emitir\/escolha-posto/i.test(this.page.url())) {
+      return;
+    }
+
+    const cidade =
+      process.env.CIDADAO_SMART_2VIA_EXPRESSA_CIDADE ||
+      process.env.CIDADAO_SMART_DEFAULT_CITY ||
+      'Florianópolis';
+
+    const campoCidade = await this.primeiroVisivel([
+      this.page.getByPlaceholder(/digite o nome da cidade|nome da cidade|cidade/i).first(),
+      this.page.locator('input[placeholder*="cidade" i]').first(),
+      this.page.locator('input').first(),
+    ]);
+
+    await campoCidade.click();
+    await campoCidade.fill('');
+    await campoCidade.type(cidade, { delay: 80 });
+
+    await this.page.waitForTimeout(1_500).catch(() => undefined);
+
+    await this.selecionarPostoTopTower();
+
+    const botaoProsseguir = this.page.getByRole('button', { name: S.botaoProsseguir }).first();
+
+    await expect(botaoProsseguir).toBeVisible({ timeout: 10_000 });
+    await expect(botaoProsseguir).toBeEnabled({ timeout: 10_000 });
+
+    const aguardarAutenticacao = this.page
+      .waitForURL(/\/emitir\/autenticacao/i, { timeout: 30_000 })
+      .catch(() => undefined);
+
+    await this.clicarBotaoAtual(botaoProsseguir);
+    await aguardarAutenticacao;
+
+    await this.page.waitForLoadState('domcontentloaded').catch(() => undefined);
+  }
+
+  /**
+   * Preenche e-mail e telefone quando a tela de autenticação solicita contato
+   * para envio do código de segurança.
+   *
+   * Se a tela já estiver no código, não tenta preencher contato de novo.
+   */
+  async preencherContatoSeNecessario(email?: string, telefone?: string): Promise<void> {
+    await this.page
+      .waitForURL(/\/emitir\/autenticacao/i, { timeout: 15_000 })
+      .catch(() => undefined);
+
+    if (!/\/emitir\/autenticacao/i.test(this.page.url())) {
+      return;
+    }
+
+    const emailFinal =
+      email ||
+      process.env.CIDADAO_SMART_2VIA_EXPRESSA_EMAIL ||
+      process.env.CIDADAO_SMART_TEST_EMAIL ||
+      'ana.testing.company@gmail.com';
+
+    const telefoneFinal =
+      telefone ||
+      process.env.CIDADAO_SMART_2VIA_EXPRESSA_TELEFONE ||
+      process.env.CIDADAO_SMART_TEST_TELEFONE ||
+      '51999917265';
+
+    const campoEmail = await this.obterCampoEmailOpcional();
+    const campoTelefone = await this.obterCampoTelefoneOpcional();
+    const campoCodigo = await this.obterCampoCodigoOpcional();
+
+    if (!campoEmail && !campoTelefone) {
+      if (campoCodigo || (await this.codigoJaValidado())) {
+        return;
+      }
+
+      const botaoProsseguir = this.page.getByRole('button', { name: S.botaoProsseguir }).first();
+
+      if (await botaoProsseguir.isVisible({ timeout: 2_000 }).catch(() => false)) {
+        return;
+      }
+
+      return;
+    }
+
+    if (campoEmail) {
+      await expect(campoEmail).toBeVisible({ timeout: 10_000 });
+      await campoEmail.click();
+      await campoEmail.fill('');
+      await campoEmail.type(emailFinal, { delay: 60 });
+      await expect(campoEmail).toHaveValue(emailFinal);
+    }
+
+    if (campoTelefone) {
+      await expect(campoTelefone).toBeVisible({ timeout: 10_000 });
+      await campoTelefone.click();
+      await campoTelefone.fill('');
+      await campoTelefone.type(telefoneFinal, { delay: 60 });
+    }
+
+    const botaoProsseguir = this.page.getByRole('button', { name: S.botaoProsseguir }).first();
+
+    await expect(botaoProsseguir).toBeVisible({ timeout: 10_000 });
+    await expect(botaoProsseguir).toBeEnabled({ timeout: 10_000 });
+
+    await this.clicarBotaoAtual(botaoProsseguir);
+
+    await this.page.waitForLoadState('domcontentloaded').catch(() => undefined);
+
+    const campoCodigoDepoisDoContato = await this.aguardarCampoCodigoOpcional(30_000);
+
+    if (campoCodigoDepoisDoContato) {
+      console.log('[EMISSAO-EXPRESSA] Código de segurança solicitado.');
+      return;
+    }
+
+    if (/\/emitir\/autenticacao/i.test(this.page.url())) {
+      await visualPause(
+        this.page,
+        '[EMISSAO-EXPRESSA] Contato enviado. Se o código apareceu, preencha, clique em Verificar e depois Resume.'
+      );
+    }
+  }
+
+  /**
+   * Resolve a etapa de código por env ou por pausa manual assistida.
    */
   async tratarCodigoSeNecessario(): Promise<void> {
+    if (this.estaNaTelaSucesso()) {
+      return;
+    }
+
     if (await this.codigoJaValidado()) {
       return;
     }
 
-    const campoCodigo = await this.aguardarCampoCodigoOpcional();
-    if (!campoCodigo) {
-      return;
-    }
+    let campoCodigo = await this.aguardarCampoCodigoOpcional(30_000);
 
-    const usarCodigoDoEnv = (process.env.EMAIL_CODE_MODE || 'manual') === 'env';
-    const codigo = usarCodigoDoEnv ? process.env.CIDADAO_SMART_SECURITY_CODE?.trim() : '';
-    if (codigo) {
+    const codigo = await this.obterCodigoAutomatico();
+
+    if (campoCodigo && codigo) {
       await campoCodigo.fill(codigo);
       await this.verificarCodigoSeNecessario();
       await this.validarCodigoValidado();
       return;
     }
 
-    await visualPause(
-      this.page,
-      '[EMISSAO-EXPRESSA] Preencha o codigo de verificacao, clique em Verificar e depois Resume.'
-    );
+    if (campoCodigo) {
+      await visualPause(
+        this.page,
+        '[EMISSAO-EXPRESSA] Preencha o código de segurança, clique em Verificar e depois clique em Resume.'
+      );
 
-    if (!(await this.codigoJaValidado())) {
-      await this.verificarCodigoSeNecessario();
-      await this.validarCodigoValidado();
+      if (this.estaNaTelaSucesso()) {
+        return;
+      }
+
+      if (!(await this.codigoJaValidado())) {
+        await this.verificarCodigoSeNecessario();
+        await this.validarCodigoValidado();
+      }
+
+      return;
+    }
+
+    if (/\/emitir\/autenticacao/i.test(this.page.url())) {
+      await visualPause(
+        this.page,
+        '[EMISSAO-EXPRESSA] Tela de autenticação aberta. Se o código foi enviado, preencha/verifique manualmente e clique em Resume.'
+      );
+
+      if (this.estaNaTelaSucesso()) {
+        return;
+      }
+
+      campoCodigo = await this.aguardarCampoCodigoOpcional(5_000);
+
+      const codigoAposPausa = await this.obterCodigoAutomatico();
+
+      if (campoCodigo && codigoAposPausa && !(await this.codigoJaValidado())) {
+        await campoCodigo.fill(codigoAposPausa);
+        await this.verificarCodigoSeNecessario();
+        await this.validarCodigoValidado();
+        return;
+      }
+
+      if (campoCodigo && !(await this.codigoJaValidado())) {
+        await this.verificarCodigoSeNecessario();
+        await this.validarCodigoValidado();
+      }
     }
   }
 
   /**
-   * Clica em Prosseguir no estado atual da autenticacao, sem assumir a proxima tela.
-   */
-  async prosseguirAutenticacaoAtual(): Promise<void> {
-    await this.clicarProsseguirAtual();
-  }
-
-  /**
-   * Avanca para tipo de emissao depois que o CAPTCHA manual ja foi resolvido.
+   * Avança para tipo de emissão depois que CPF, CAPTCHA, posto,
+   * contato e código já foram tratados.
    */
   async prosseguirParaTipoEmissao(): Promise<void> {
-    if (/\/emitir\/tipo-emissao/i.test(this.page.url())) {
+    const rotaTipoEmissao = /\/emitir\/tipo-emissao/i;
+
+    if (rotaTipoEmissao.test(this.page.url()) || this.estaNaTelaSucesso()) {
       return;
     }
 
-    const botaoProsseguir = this.page.getByRole('button', { name: S.botaoProsseguir }).first();
-    await expect(botaoProsseguir).toBeVisible();
+    for (let tentativa = 1; tentativa <= 3; tentativa += 1) {
+      if (rotaTipoEmissao.test(this.page.url()) || this.estaNaTelaSucesso()) {
+        return;
+      }
 
-    if (!(await botaoProsseguir.isEnabled())) {
-      await this.tratarCodigoSeNecessario();
-    }
+      if (/\/emitir\/escolha-posto/i.test(this.page.url())) {
+        await this.selecionarPostoRetiradaSeNecessario();
+        continue;
+      }
 
-    if (!(await botaoProsseguir.isEnabled()) && /\/emitir\/autenticacao/i.test(this.page.url())) {
-      await visualPause(
-        this.page,
-        '[EMISSAO-EXPRESSA] Autenticacao aguardando codigo. Preencha o codigo, clique em Verificar e depois Resume.'
-      );
-    }
+      if (/\/emitir\/autenticacao/i.test(this.page.url())) {
+        await this.preencherContatoSeNecessario();
+        await this.tratarCodigoSeNecessario();
 
-    await expect(botaoProsseguir).toBeEnabled();
+        if (rotaTipoEmissao.test(this.page.url()) || this.estaNaTelaSucesso()) {
+          return;
+        }
 
-    const aguardarTipoEmissao = this.page
-      .waitForURL(/\/emitir\/tipo-emissao/i, { timeout: 30_000 })
-      .catch(() => undefined);
+        const botaoProsseguir = this.page.getByRole('button', { name: S.botaoProsseguir }).first();
 
-    await this.clicarBotaoAtual(botaoProsseguir);
-    await aguardarTipoEmissao;
+        if (await botaoProsseguir.isVisible({ timeout: 3_000 }).catch(() => false)) {
+          if (await botaoProsseguir.isEnabled().catch(() => false)) {
+            const aguardarTipoEmissao = this.page
+              .waitForURL(rotaTipoEmissao, { timeout: 15_000 })
+              .catch(() => undefined);
 
-    if (/\/emitir\/tipo-emissao/i.test(this.page.url())) {
-      return;
-    }
+            await this.clicarBotaoAtual(botaoProsseguir);
+            await aguardarTipoEmissao;
 
-    if (/\/emitir\/autenticacao/i.test(this.page.url()) && (await this.codigoJaValidado())) {
-      await botaoProsseguir.click({ force: true }).catch(() => undefined);
-      await this.page.waitForURL(/\/emitir\/tipo-emissao/i, { timeout: 10_000 }).catch(() => undefined);
-    }
+            if (rotaTipoEmissao.test(this.page.url()) || this.estaNaTelaSucesso()) {
+              return;
+            }
+          }
+        }
 
-    if (/\/emitir\/tipo-emissao/i.test(this.page.url())) {
-      return;
-    }
+        await visualPause(
+          this.page,
+          `[EMISSAO-EXPRESSA] Ainda estamos na tela de autenticação. Verifique se o código foi preenchido, clique em Verificar/Prosseguir se necessário e depois clique em Resume. Tentativa ${tentativa}/3.`
+        );
 
-    if (/\/emitir\/autenticacao/i.test(this.page.url()) && (await this.codigoJaValidado())) {
-      await visualPause(
-        this.page,
-        '[EMISSAO-EXPRESSA] Codigo validado. Clique em Prosseguir na tela de autenticacao e depois Resume.'
-      );
-      await this.page.waitForURL(/\/emitir\/tipo-emissao/i, { timeout: 10_000 }).catch(() => undefined);
-    }
+        if (rotaTipoEmissao.test(this.page.url()) || this.estaNaTelaSucesso()) {
+          return;
+        }
 
-    if (/\/emitir\/tipo-emissao/i.test(this.page.url())) {
-      return;
+        continue;
+      }
+
+      const botaoProsseguir = this.page.getByRole('button', { name: S.botaoProsseguir }).first();
+
+      if (await botaoProsseguir.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        if (await botaoProsseguir.isEnabled().catch(() => false)) {
+          const aguardarTipoEmissao = this.page
+            .waitForURL(rotaTipoEmissao, { timeout: 15_000 })
+            .catch(() => undefined);
+
+          await this.clicarBotaoAtual(botaoProsseguir);
+          await aguardarTipoEmissao;
+
+          if (rotaTipoEmissao.test(this.page.url()) || this.estaNaTelaSucesso()) {
+            return;
+          }
+        }
+      }
+
+      await this.page.waitForTimeout(1_000).catch(() => undefined);
     }
 
     if (await this.page.getByText(S.erroCaptcha).isVisible().catch(() => false)) {
@@ -167,21 +367,98 @@ export class CidadaoSmartEmissaoCpfPage {
     throw new Error(`EMISSAO_CPF_NAO_AVANCOU url=${this.page.url()}`);
   }
 
+  private async selecionarPostoTopTower(): Promise<void> {
+    const radioTopTower = this.page
+      .getByRole('radio', {
+        name: /Top Tower|PCI - FLORIANÓPOLIS - Top Tower|PCI - FLORIANOPOLIS - Top Tower/i,
+      })
+      .first();
+
+    if (await radioTopTower.isVisible({ timeout: 2_000 }).catch(() => false)) {
+      await radioTopTower.click({ force: true });
+      await this.page.waitForTimeout(800).catch(() => undefined);
+      return;
+    }
+
+    const labelTopTower = this.page
+      .getByLabel(/Top Tower|PCI - FLORIANÓPOLIS - Top Tower|PCI - FLORIANOPOLIS - Top Tower/i)
+      .first();
+
+    if (await labelTopTower.isVisible({ timeout: 2_000 }).catch(() => false)) {
+      await labelTopTower.click({ force: true });
+      await this.page.waitForTimeout(800).catch(() => undefined);
+      return;
+    }
+
+    const textoTopTower = this.page
+      .getByText(/PCI - FLORIANÓPOLIS - Top Tower|PCI - FLORIANOPOLIS - Top Tower|Top Tower/i)
+      .first();
+
+    await expect(textoTopTower).toBeVisible({ timeout: 15_000 });
+
+    const cardTopTower = textoTopTower.locator(
+      'xpath=ancestor::*[self::div or self::label or self::button][contains(., "Top Tower")][1]'
+    );
+
+    if (await cardTopTower.isVisible({ timeout: 2_000 }).catch(() => false)) {
+      const radioNoCard = cardTopTower.locator('input[type="radio"], [role="radio"]').first();
+
+      if (await radioNoCard.isVisible({ timeout: 1_000 }).catch(() => false)) {
+        await radioNoCard.click({ force: true });
+        await this.page.waitForTimeout(800).catch(() => undefined);
+        return;
+      }
+
+      const box = await cardTopTower.boundingBox();
+
+      if (box) {
+        await this.page.mouse.click(box.x + box.width - 25, box.y + 30);
+        await this.page.waitForTimeout(800).catch(() => undefined);
+        return;
+      }
+    }
+
+    const boxTexto = await textoTopTower.boundingBox();
+
+    if (!boxTexto) {
+      throw new Error('EMISSAO_POSTO_TOP_TOWER_SEM_BOUNDING_BOX');
+    }
+
+    await this.page.mouse.click(boxTexto.x + 390, boxTexto.y + 5);
+    await this.page.waitForTimeout(800).catch(() => undefined);
+  }
+
+  private estaNaTelaSucesso(): boolean {
+    return /\/emitir\/sucesso/i.test(this.page.url());
+  }
+
   private async obterCampoCpf(): Promise<Locator> {
     const placeholder = this.page.getByPlaceholder(S.campoCpfPlaceholder);
-    if ((await placeholder.count()) > 0) return placeholder.first();
+
+    if ((await placeholder.count()) > 0) {
+      return placeholder.first();
+    }
 
     const byLabel = this.page.getByLabel(/cpf/i);
-    if ((await byLabel.count()) > 0) return byLabel.first();
+
+    if ((await byLabel.count()) > 0) {
+      return byLabel.first();
+    }
 
     return this.page.locator('input[name*="cpf" i], input[id*="cpf" i], input[type="text"]').first();
   }
 
   private async obterCampoEmailOpcional(): Promise<Locator | null> {
     const locators = [
-      this.page.getByLabel(S.campoEmail).first(),
-      this.page.getByPlaceholder(/digite seu e-mail|email|e-mail/i).first(),
-      this.page.locator('input[type="email"], input[name*="email" i], input[id*="email" i]').first(),
+      this.page.getByLabel(/e-mail|email/i).first(),
+      this.page.getByPlaceholder(/digite seu e-mail/i).first(),
+      this.page.getByPlaceholder(/digite seu email/i).first(),
+      this.page.getByPlaceholder(/email|e-mail/i).first(),
+      this.page.locator('input[type="email"]').first(),
+      this.page.locator('input[name*="email" i]').first(),
+      this.page.locator('input[id*="email" i]').first(),
+      this.page.locator('input[placeholder*="email" i]').first(),
+      this.page.locator('input[placeholder*="e-mail" i]').first(),
     ];
 
     return this.primeiroVisivelOpcional(locators);
@@ -189,9 +466,15 @@ export class CidadaoSmartEmissaoCpfPage {
 
   private async obterCampoTelefoneOpcional(): Promise<Locator | null> {
     const locators = [
-      this.page.getByLabel(S.campoTelefone).first(),
-      this.page.getByPlaceholder(/\(00\) 00000-0000|telefone/i).first(),
-      this.page.locator('input[name*="telefone" i], input[id*="telefone" i], input[type="tel"]').first(),
+      this.page.getByLabel(/telefone|celular/i).first(),
+      this.page.getByPlaceholder(/telefone|celular/i).first(),
+      this.page.getByPlaceholder(/\(00\) 00000-0000/i).first(),
+      this.page.getByPlaceholder(/\(48\) 00000-0000/i).first(),
+      this.page.locator('input[type="tel"]').first(),
+      this.page.locator('input[name*="telefone" i]').first(),
+      this.page.locator('input[id*="telefone" i]').first(),
+      this.page.locator('input[placeholder*="telefone" i]').first(),
+      this.page.locator('input[placeholder*="00000" i]').first(),
     ];
 
     return this.primeiroVisivelOpcional(locators);
@@ -219,6 +502,7 @@ export class CidadaoSmartEmissaoCpfPage {
       }
 
       const campoCodigo = await this.obterCampoCodigoOpcional();
+
       if (campoCodigo) {
         return campoCodigo;
       }
@@ -227,10 +511,20 @@ export class CidadaoSmartEmissaoCpfPage {
         return null;
       }
 
-      await this.page.waitForTimeout(500);
+      await this.page.waitForTimeout(500).catch(() => undefined);
     }
 
     return null;
+  }
+
+  private async primeiroVisivel(locators: Locator[]): Promise<Locator> {
+    const locator = await this.primeiroVisivelOpcional(locators);
+
+    if (!locator) {
+      throw new Error('Nenhum locator visível encontrado.');
+    }
+
+    return locator;
   }
 
   private async primeiroVisivelOpcional(locators: Locator[]): Promise<Locator | null> {
@@ -255,24 +549,43 @@ export class CidadaoSmartEmissaoCpfPage {
     await expect(this.page.getByText(S.mensagemCodigoValidado).first()).toBeVisible();
   }
 
+  private async obterCodigoAutomatico(): Promise<string | null> {
+    switch (this.env.emailCodeMode) {
+      case 'env': {
+        const codigo = this.env.securityCode?.trim();
+        if (!codigo) {
+          console.warn('[EMISSAO-EXPRESSA] EMAIL_CODE_MODE=env sem CIDADAO_SMART_SECURITY_CODE.');
+          return null;
+        }
+
+        console.log('[EMISSAO-EXPRESSA] Codigo lido de CIDADAO_SMART_SECURITY_CODE.');
+        return codigo;
+      }
+      case 'imap':
+        return this.imapProvider.obterCodigoMaisRecente();
+      case 'gmail-api':
+        return this.gmailProvider.obterCodigoMaisRecente();
+      case 'internal-api':
+      case 'log':
+        console.warn(`[EMISSAO-EXPRESSA] EMAIL_CODE_MODE=${this.env.emailCodeMode} ainda nao implementado neste fluxo.`);
+        return null;
+      case 'manual':
+      default:
+        return null;
+    }
+  }
+
   private async verificarCodigoSeNecessario(): Promise<void> {
     if (await this.codigoJaValidado()) {
       return;
     }
 
     const botaoVerificar = this.page.getByRole('button', { name: S.botaoVerificar }).first();
+
     if (await botaoVerificar.isVisible({ timeout: 2_000 }).catch(() => false)) {
       await expect(botaoVerificar).toBeEnabled();
       await this.clicarBotaoAtual(botaoVerificar);
     }
-  }
-
-  private async clicarProsseguirAtual(): Promise<void> {
-    const botaoProsseguir = this.page.getByRole('button', { name: S.botaoProsseguir }).first();
-    await expect(botaoProsseguir).toBeVisible();
-    await expect(botaoProsseguir).toBeEnabled();
-    await this.clicarBotaoAtual(botaoProsseguir);
-    await this.page.waitForLoadState('networkidle').catch(() => undefined);
   }
 
   private async clicarBotaoAtual(botao: Locator): Promise<void> {
@@ -282,8 +595,7 @@ export class CidadaoSmartEmissaoCpfPage {
       await botao.click({ timeout: 5_000 });
       return;
     } catch {
-      // Alguns layouts mobile interceptam o ponto do clique; nesse caso usamos
-      // o elemento ja resolvido para nao clicar em outro botao apos a troca da SPA.
+      // Alguns layouts interceptam o clique; nesse caso usamos o elemento já resolvido.
     }
 
     await botao.evaluate((element: any) => {

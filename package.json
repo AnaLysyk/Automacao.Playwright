@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "test": "playwright test",
     "test:list": "playwright test --list --reporter=list",
     "test:all": "playwright test tests/smoke tests/booking/public tests/emissao-online tests/consulta tests/2via tests/api tests/e2e tests/booking/e2e tests/booking-admin/read-only --project=chromium",
@@ -30,6 +31,7 @@
     "test:demo": "playwright test tests/manual-assisted --headed --project=chromium",
     "test:captura:poc": "playwright test tests/poc/captura-fake-video.spec.ts --headed --project=chromium",
     "media:fake-video": "tsx scripts/gerarFakeVideoCaptura.ts",
+    "email:qa:check": "tsx scripts/validarEmailQa.ts",
     "test:agendamento": "playwright test tests/booking/public --headed --project=chromium",
     "test:agendamento:local": "playwright test tests/booking/public/cidadao-smart-agendamento-presencial.spec.ts --headed --project=chromium",
     "test:agendamento:data-hora": "playwright test tests/booking/public/cidadao-smart-agendamento-validacoes.spec.ts --grep \"data|cpf vazio\" --headed --project=chromium",

@@ -87,6 +87,39 @@ A estratégia profissional é OAuth com uma caixa de teste, usando:
 
 Credenciais e tokens devem ficar somente em `.env.local` ou arquivos locais ignorados pelo Git.
 
+## 8.1 Caixa QA por IMAP
+
+Para deixar somente o reCAPTCHA como etapa manual, criar uma caixa dedicada
+para testes, por exemplo:
+
+```text
+qa-cidadao-smart@seudominio
+```
+
+Configurar no `.env.local`:
+
+```env
+EMAIL_CODE_MODE=imap
+CIDADAO_SMART_TEST_EMAIL=qa-cidadao-smart@seudominio
+CIDADAO_SMART_2VIA_EXPRESSA_EMAIL=qa-cidadao-smart@seudominio
+CIDADAO_SMART_EMAIL_IMAP_HOST=imap.seudominio
+CIDADAO_SMART_EMAIL_IMAP_PORT=993
+CIDADAO_SMART_EMAIL_IMAP_SECURE=true
+CIDADAO_SMART_EMAIL_IMAP_USER=qa-cidadao-smart@seudominio
+CIDADAO_SMART_EMAIL_IMAP_PASSWORD=<app-password-ou-senha-da-caixa>
+CIDADAO_SMART_EMAIL_IMAP_MAILBOX=INBOX
+CIDADAO_SMART_EMAIL_CODE_REGEX=\b(\d{6})\b
+```
+
+Validar acesso antes de rodar o fluxo:
+
+```bash
+npm run email:qa:check
+```
+
+Com essa configuracao, a automacao le o codigo via IMAP e a pessoa so precisa
+resolver o reCAPTCHA real.
+
 ## 9. Alternativas Internas de QA
 
 Alternativas futuras:

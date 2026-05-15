@@ -29,6 +29,10 @@ test.describe('Cidadao Smart - Emissao - Autenticacao', () => {
   });
 
   test('deve preencher dados validos, resolver captcha e avancar', async ({ page }) => {
+  test.skip(
+    process.env.CAPTCHA_MODE === 'manual',
+    'Cenário assistido: depende de resolução manual do CAPTCHA.'
+  );
     const autenticacaoPage = new CidadaoSmartEmissaoAutenticacaoPage(page);
 
     await test.step('Acessar tela e preencher dados', async () => {
