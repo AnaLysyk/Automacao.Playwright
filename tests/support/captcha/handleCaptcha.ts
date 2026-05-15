@@ -1,47 +1,54 @@
-import { Page } from "@playwright/test";
+import { Page } from '@playwright/test';
 
 /**
- * Helper para simular CAPTCHA em diferentes modos.
- * Não tenta burlar CAPTCHA real.
- * 
- * Modos:
- * - manual: Pausa para resolução manual no browser
- * - disabled: Não faz nada (ambiente QA)
- * - test: Placeholder para futuro modo teste
+ * Trata CAPTCHA sem tentar burlar o desafio real.
+ * Em modo manual, pausa apenas quando a tela realmente mostra o widget.
  */
-export async function handleCaptcha(page: Page) {
-  const mode = process.env.CAPTCHA_MODE || "manual";
+export async function handleCaptcha(page: Page): Promise<void> {
+  const mode = process.env.CAPTCHA_MODE || 'manual';
 
-  if (mode === "disabled") {
-    console.log("⏭️  CAPTCHA_MODE=disabled, pulando CAPTCHA");
+  if (mode === 'disabled') {
+    console.log('[CAPTCHA] CAPTCHA_MODE=disabled. Aguardando bypass oficial do ambiente.');
     return;
   }
 
-  if (mode === "manual") {
-    console.log("⏸️  CAPTCHA detectado. Resolva manualmente e continue.");
-    await page.pause();
+  if (mode === 'test') {
+    console.log('[CAPTCHA] CAPTCHA_MODE=test disponivel apenas com suporte oficial de QA.');
     return;
   }
 
-  if (mode === "test") {
-    console.log("🧪 CAPTCHA_MODE=test disponível apenas em ambiente QA com bypass habilitado");
+  if (mode !== 'manual') {
+    throw new Error(`CAPTCHA_MODE invalido: ${mode}`);
+  }
+
+  if (!(await isCaptchaVisivel(page))) {
     return;
   }
 
-  throw new Error(`CAPTCHA_MODE inválido: ${mode}`);
+  console.log('[CAPTCHA] Resolva o CAPTCHA no navegador. Depois clique em Resume no Playwright.');
+  await page.pause();
 }
 
 /**
- * Helper para esperar a resolução manual do CAPTCHA com timeout seguro.
+ * Pausa explicitamente para resolucao manual do CAPTCHA quando o fluxo pedir.
  */
 export async function waitForCaptchaResolution(
   page: Page,
-  timeoutMs: number = 60000
-) {
-  const mode = process.env.CAPTCHA_MODE || "manual";
+  timeoutMs: number = 60_000
+): Promise<void> {
+  const mode = process.env.CAPTCHA_MODE || 'manual';
+  if (mode === 'disabled') return;
 
-  if (mode === "disabled") return;
-
-  console.log(`⏱️  Aguardando resolução do CAPTCHA (timeout: ${timeoutMs}ms)`);
+  console.log(`[CAPTCHA] Aguardando resolucao manual do CAPTCHA. Timeout sugerido: ${timeoutMs}ms.`);
   await page.pause();
+}
+
+async function isCaptchaVisivel(page: Page): Promise<boolean> {
+  const captchaIframe = page.locator('iframe[src*="recaptcha"], iframe[src*="api2/anchor"]');
+  const captchaTexto = page.getByText(/nao sou um robo|n.o sou um rob.|selecione todas as imagens/i);
+
+  return (
+    (await captchaIframe.count().catch(() => 0)) > 0 ||
+    (await captchaTexto.count().catch(() => 0)) > 0
+  );
 }

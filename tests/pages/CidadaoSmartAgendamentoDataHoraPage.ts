@@ -1,5 +1,6 @@
 import { expect, Page } from '@playwright/test';
 import { CidadaoSmartAgendamentoDataHoraPageSelectors as S } from './selectors/CidadaoSmartAgendamentoDataHoraPageSelectors.ts';
+import { digitarComoUsuario } from '../helpers/typingHelper';
 
 /**
  * Eu concentro aqui tudo que a tela Data e Hora sabe fazer:
@@ -28,7 +29,9 @@ export class CidadaoSmartAgendamentoDataHoraPage {
    * Eu preencho a data de nascimento no formato esperado pela tela.
    */
   async preencherDataNascimento(dataNascimento: string): Promise<void> {
-    await this.page.getByPlaceholder('DD/MM/AAAA').fill(dataNascimento);
+    const dataNascimentoUi = this.toUiDate(dataNascimento);
+    await digitarComoUsuario(this.page.getByPlaceholder('DD/MM/AAAA'), dataNascimentoUi);
+    await expect(this.page.getByPlaceholder('DD/MM/AAAA')).toHaveValue(dataNascimentoUi);
   }
 
   /**
@@ -221,5 +224,13 @@ export class CidadaoSmartAgendamentoDataHoraPage {
    */
   async validarErroMenorIdade(): Promise<void> {
     await expect(this.page.getByText(S.mensagemMenorIdade)).toBeVisible();
+  }
+
+  private toUiDate(date: string): string {
+    const isoDate = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!isoDate) return date;
+
+    const [, year, month, day] = isoDate;
+    return `${day}/${month}/${year}`;
   }
 }

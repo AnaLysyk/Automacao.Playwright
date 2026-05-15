@@ -4,19 +4,28 @@ import { loadEnvConfig } from '../config/env';
 import { ExecutionContext } from '../types/ExecutionContext';
 import { visualPause } from '../helpers/visualPause';
 import { GmailCodeProvider } from '../providers/GmailCodeProvider';
+import { ImapEmailCodeProvider } from '../providers/ImapEmailCodeProvider';
 
 export class EmailCodeAgent {
   private readonly env = loadEnvConfig();
   private readonly gmailProvider = new GmailCodeProvider(this.env);
+  private readonly imapProvider = new ImapEmailCodeProvider(this.env);
 
   /**
-   * Eu coordeno a obtenção do código e o preenchimento na tela de autenticação.
+   * Coordena a resposta do e-mail de seguranca: captura o codigo por modo configurado,
+   * preenche na tela, clica em Verificar e confirma que o Booking aceitou.
    */
   async processarCodigo(
     page: Page,
     autenticacaoPage: CidadaoSmartAgendamentoAutenticacaoPage,
     context: ExecutionContext
   ): Promise<void> {
+    if (await autenticacaoPage.codigoJaValidado()) {
+      context.emailCodeStatus = 'validado';
+      console.log('[EMAIL-CODE] Codigo de seguranca ja estava validado na tela.');
+      return;
+    }
+
     const codigo = await this.obterCodigo(context);
 
     if (codigo) {
@@ -28,12 +37,15 @@ export class EmailCodeAgent {
   }
 
   /**
-   * Eu escolho a estratégia de código conforme EMAIL_CODE_MODE.
+   * Escolhe a estrategia de captura conforme EMAIL_CODE_MODE.
+   * Modos seguros: manual, env, imap, gmail-api, internal-api e log autorizado.
    */
   async obterCodigo(context: ExecutionContext): Promise<string | null> {
     switch (this.env.emailCodeMode) {
       case 'env':
         return this.obterCodigoPorEnv(context);
+      case 'imap':
+        return this.obterCodigoPorImap(context);
       case 'gmail-api':
         return this.obterCodigoPorGmailApi(context);
       case 'internal-api':
@@ -48,40 +60,51 @@ export class EmailCodeAgent {
   }
 
   /**
-   * Eu leio o código diretamente do .env.local quando EMAIL_CODE_MODE=env.
+   * Le o codigo diretamente do .env.local quando EMAIL_CODE_MODE=env.
+   * Use apenas em ambiente controlado, porque o valor nao deve ir para Git.
    */
   async obterCodigoPorEnv(context: ExecutionContext): Promise<string | null> {
     const codigo = this.env.securityCode?.trim();
 
     if (!codigo) {
-      console.warn('[EMAIL-CODE] EMAIL_CODE_MODE=env, mas CIDADAO_SMART_SECURITY_CODE está vazio.');
+      console.warn('[EMAIL-CODE] EMAIL_CODE_MODE=env, mas CIDADAO_SMART_SECURITY_CODE esta vazio.');
       return null;
     }
 
-    console.log('[EMAIL-CODE] Código lido de CIDADAO_SMART_SECURITY_CODE.');
+    console.log('[EMAIL-CODE] Codigo lido de CIDADAO_SMART_SECURITY_CODE.');
     context.emailCodeStatus = 'env';
     return codigo;
   }
 
   /**
-   * Eu preparo o modo manual, pausando para a pessoa informar o código na tela.
+   * Captura por IMAP: le a caixa de teste autorizada, extrai o codigo e responde
+   * automaticamente na tela do Booking.
+   */
+  async obterCodigoPorImap(context: ExecutionContext): Promise<string | null> {
+    context.emailCodeStatus = 'imap';
+    return this.imapProvider.obterCodigoMaisRecente();
+  }
+
+  /**
+   * Modo manual: a pessoa informa o codigo na tela, clica em Verificar quando preciso
+   * e depois usa Resume para a automacao continuar.
    */
   async obterCodigoManual(
     page: Page,
     autenticacaoPage: CidadaoSmartAgendamentoAutenticacaoPage,
     context: ExecutionContext
   ): Promise<null> {
-    console.warn('[EMAIL-CODE] Aguardando preenchimento manual do código de segurança.');
+    console.warn('[EMAIL-CODE] Aguardando preenchimento manual do codigo de seguranca.');
     context.emailCodeStatus = 'manual';
 
     await visualPause(
       page,
-      '[EMAIL-CODE] Preencha o código de segurança no navegador. Se necessário, clique em Verificar e depois Resume.'
+      '[EMAIL-CODE] Preencha o codigo de seguranca no navegador. Se necessario, clique em Verificar e depois Resume.'
     );
 
     if (page.url().includes('/confirmacao')) {
       context.emailCodeStatus = 'validado';
-      console.log('[EMAIL-CODE] Fluxo já está na confirmação após ação manual.');
+      console.log('[EMAIL-CODE] Fluxo ja esta na confirmacao apos acao manual.');
       return null;
     }
 
@@ -97,7 +120,7 @@ export class EmailCodeAgent {
   }
 
   /**
-   * Eu deixo a integração Gmail API pronta para evoluir com OAuth, sem automatizar a UI do Gmail.
+   * Mantem a integracao Gmail API/OAuth preparada, sem automatizar a UI do Gmail.
    */
   async obterCodigoPorGmailApi(context: ExecutionContext): Promise<string | null> {
     context.emailCodeStatus = 'gmail-api';
@@ -105,25 +128,25 @@ export class EmailCodeAgent {
   }
 
   /**
-   * Eu reservo a estratégia de endpoint interno de QA para quando ele existir oficialmente.
+   * Reserva o endpoint interno de QA para quando existir contrato oficial.
    */
   async obterCodigoPorInternalApi(context: ExecutionContext): Promise<string | null> {
     context.emailCodeStatus = 'internal-api';
-    console.warn('[EMAIL-CODE] EMAIL_CODE_MODE=internal-api ainda não possui endpoint configurado.');
+    console.warn('[EMAIL-CODE] EMAIL_CODE_MODE=internal-api ainda nao possui endpoint configurado.');
     return null;
   }
 
   /**
-   * Eu reservo a estratégia de log para uso somente com autorização formal do ambiente.
+   * Reserva leitura de logs para uso somente com autorizacao formal do ambiente.
    */
   async obterCodigoPorLog(context: ExecutionContext): Promise<string | null> {
     context.emailCodeStatus = 'log';
-    console.warn('[EMAIL-CODE] EMAIL_CODE_MODE=log exige leitura autorizada de logs e ainda não está implementado.');
+    console.warn('[EMAIL-CODE] EMAIL_CODE_MODE=log exige leitura autorizada de logs e ainda nao esta implementado.');
     return null;
   }
 
   /**
-   * Eu preencho o código encontrado e valido que a tela aceitou a autenticação.
+   * Responde o desafio de e-mail: preenche, verifica e guarda o status no contexto.
    */
   private async preencherEValidarCodigo(
     autenticacaoPage: CidadaoSmartAgendamentoAutenticacaoPage,

@@ -1,12 +1,14 @@
-import { expect, Page } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 import { knownIssues } from '../config/knownIssues';
 import { CidadaoSmartAgendamentoLocalPageSelectors as S } from './selectors/CidadaoSmartAgendamentoLocalPageSelectors.ts';
 
 export class CidadaoSmartAgendamentoLocalPage {
+  private captchaPauseExecutada = false;
+
   constructor(private readonly page: Page) {}
 
   /**
-   * Eu abro diretamente a rota de localizacao do agendamento presencial.
+   * Abre diretamente a rota de localizacao do agendamento presencial.
    */
   async acessar(): Promise<void> {
     await this.page.goto('/agendamentos/novo/local');
@@ -16,13 +18,13 @@ export class CidadaoSmartAgendamentoLocalPage {
       const currentUrl = this.page.url();
       const currentTitle = await this.page.title();
       throw new Error(
-        `AGENDAMENTO_REQUER_LOGIN_SMART: a rota /agendamentos/novo/local abriu a tela de login SMART. url=${currentUrl} title=${currentTitle}. Verifique se o ambiente exige autenticação prévia ou se a URL base está incorreta.`
+        `AGENDAMENTO_REQUER_LOGIN_SMART: a rota /agendamentos/novo/local abriu a tela de login SMART. url=${currentUrl} title=${currentTitle}. Verifique autenticacao previa ou URL base.`
       );
     }
   }
 
   /**
-   * Eu confiro se a tela de localizacao exibiu os textos e opcoes principais.
+   * Confere se a tela de localizacao exibiu os textos e opcoes principais.
    */
   async validarTelaLocal(): Promise<void> {
     await expect(this.page.getByText(S.instrucaoLocalizacao)).toBeVisible();
@@ -30,29 +32,8 @@ export class CidadaoSmartAgendamentoLocalPage {
     await expect(this.page.getByText(S.radioCep).first()).toBeVisible();
   }
 
-  private async estaTelaDeLoginSmart(): Promise<boolean> {
-    await this.page.waitForTimeout(1500);
-
-    const loginMarkers = [
-      this.page.getByText(/SMART/i).first(),
-      this.page.getByText(/usuário|usuario/i).first(),
-      this.page.getByText(/senha/i).first(),
-      this.page.getByRole('button', { name: /acessar|entrar|login/i }).first(),
-      this.page.getByPlaceholder(/usuario|usuário|login/i).first(),
-      this.page.getByPlaceholder(/senha/i).first(),
-    ];
-
-    for (const locator of loginMarkers) {
-      if (await locator.isVisible().catch(() => false)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   /**
-   * Eu marco a busca por cidade, quando o radio existir, e digito a cidade desejada.
+   * Marca busca por cidade, quando o radio existe, e digita a cidade desejada.
    */
   async buscarPorCidade(cidade: string): Promise<void> {
     const radioCidade = this.page.getByRole('radio', { name: S.radioCidade });
@@ -64,7 +45,7 @@ export class CidadaoSmartAgendamentoLocalPage {
   }
 
   /**
-   * Eu seleciono a cidade sugerida pela tela depois da busca.
+   * Seleciona a cidade sugerida pela tela depois da busca.
    */
   async selecionarCidade(cidade: string): Promise<void> {
     const cidadeOption = this.page.getByText(new RegExp(cidade, 'i')).first();
@@ -74,14 +55,25 @@ export class CidadaoSmartAgendamentoLocalPage {
   }
 
   /**
-   * Eu seleciono exatamente o posto esperado para manter a validacao de negocio fiel.
+   * Seleciona exatamente o posto esperado para manter a validacao de negocio fiel.
    */
   async selecionarPosto(nomePosto: string): Promise<void> {
-    await this.page.getByText(nomePosto, { exact: true }).click();
+    const postoText = this.page.getByText(nomePosto, { exact: true }).first();
+
+    // Alguns layouts exibem o nome dentro de um card; clicar no texto nem sempre
+    // aciona a selecao. Primeiro tentamos clicar no ancestral clicavel.
+    const card = postoText.locator('xpath=ancestor::div[contains(@class, "cursor-pointer")]');
+    if ((await card.count()) > 0) {
+      await card.click();
+      await this.page.waitForTimeout(250);
+      return;
+    }
+
+    await postoText.click();
   }
 
   /**
-   * Eu registro a divergencia conhecida Top Tower/Aeroporto sem bloquear o fluxo principal.
+   * Registra a divergencia conhecida Top Tower/Aeroporto sem bloquear o fluxo principal.
    */
   async validarQueNaoSelecionouPostoErrado(): Promise<void> {
     const aeroportoVisivel = await this.page
@@ -97,61 +89,152 @@ export class CidadaoSmartAgendamentoLocalPage {
   }
 
   /**
-   * Eu pauso a execucao quando a tela mostra CAPTCHA e preciso de acao humana.
+   * Pausa quando a tela mostra CAPTCHA real.
+   * A automacao nao resolve CAPTCHA: a pessoa deve marcar o desafio e pode clicar em Prosseguir.
    */
   async resolverCaptchaManual(): Promise<void> {
-    const captchaIframe = this.page.locator(
-      'iframe[src*="recaptcha"], iframe[src*="api2/anchor"]'
-    );
-    const captchaTexto = this.page.getByText(/selecione todas as imagens/i);
-
-    if ((await captchaIframe.count()) > 0 || (await captchaTexto.count()) > 0) {
-      console.log(
-        'CAPTCHA detectado: marque "Nao sou um robo", clique em Prosseguir manualmente e depois clique em Resume no Playwright.'
-      );
-
-      await this.page.pause();
-    }
-  }
-
-  /**
-   * Eu avanço para Data e Hora; se o botao ainda estiver travado por CAPTCHA,
-   * eu pauso para resolver manualmente antes de continuar.
-   */
-  async prosseguir(): Promise<void> {
-    if (this.page.url().includes('/agendamentos/novo/data-e-hora')) {
+    if ((process.env.CAPTCHA_MODE || 'manual') !== 'manual') {
       return;
     }
 
-    const botaoProsseguir = this.page.getByRole('button', {
-      name: S.botaoProsseguir,
-    });
+    if (!(await this.isCaptchaVisivel())) {
+      return;
+    }
 
+    console.log(
+      'CAPTCHA detectado: marque "Nao sou um robo". Se o botao liberar, clique em Prosseguir; depois clique em Resume no Playwright.'
+    );
+
+    this.captchaPauseExecutada = true;
+    await this.page.pause();
+    await this.aguardarTelaDataHoraOpcional(2_000);
+  }
+
+  /**
+   * Avanca para Data e Hora.
+   * Se o CAPTCHA real continuar travando o botao, gera erro classificavel como bloqueio.
+   */
+  async prosseguir(): Promise<void> {
+    if (await this.estaNaTelaDataHora()) {
+      return;
+    }
+
+    const botaoProsseguir = this.page.getByRole('button', { name: S.botaoProsseguir }).first();
     await expect(botaoProsseguir).toBeVisible();
 
-    const estaHabilitado = await botaoProsseguir.isEnabled();
-    if (!estaHabilitado) {
+    if (!(await botaoProsseguir.isEnabled())) {
+      await this.tratarBotaoProsseguirDesabilitado(botaoProsseguir);
+    }
+
+    if (await this.estaNaTelaDataHora()) {
+      return;
+    }
+
+    if (!(await botaoProsseguir.isEnabled())) {
+      throw new Error(await this.erroProsseguirDesabilitado(botaoProsseguir));
+    }
+
+    await Promise.all([
+      this.page.waitForURL(/\/agendamentos\/novo\/data-e-hora/i, { timeout: 30_000 }).catch(() => undefined),
+      botaoProsseguir.click(),
+    ]);
+
+    if (!(await this.estaNaTelaDataHora())) {
+      throw new Error(`PROSSEGUIR_NAO_NAVEGOU url=${this.page.url()}`);
+    }
+  }
+
+  private async tratarBotaoProsseguirDesabilitado(botaoProsseguir: Locator): Promise<void> {
+    const mode = process.env.CAPTCHA_MODE || 'manual';
+    const captchaVisivel = await this.isCaptchaVisivel();
+
+    if (mode === 'manual' && captchaVisivel && !this.captchaPauseExecutada) {
       console.log(
-        'Botao Prosseguir esta desabilitado. Verifique se o CAPTCHA foi resolvido ou se a tela exige outra acao antes de continuar.'
+        'CAPTCHA bloqueando Prosseguir: resolva no navegador e clique em Resume. Se o botao liberar, a automacao clica; se voce ja clicar, ela continua.'
       );
-      const buttonText = (await botaoProsseguir.textContent())?.trim();
-      const pageUrl = this.page.url();
-      const buttonDisabledAttribute = await botaoProsseguir.getAttribute('disabled');
 
+      this.captchaPauseExecutada = true;
       await this.page.pause();
+      await this.aguardarTelaDataHoraOpcional(5_000);
+      return;
+    }
 
-      if (this.page.url().includes('/agendamentos/novo/data-e-hora')) {
-        return;
-      }
+    if (mode === 'manual' && this.captchaPauseExecutada) {
+      throw new Error(await this.erroCaptchaBloqueando(botaoProsseguir));
+    }
 
-      const estaHabilitadoAposPausa = await botaoProsseguir.isEnabled();
-      if (!estaHabilitadoAposPausa) {
-        throw new Error(
-          `PROSSEGUIR_BOTAO_DESABILITADO url=${pageUrl} text="${buttonText}" disabled=${buttonDisabledAttribute}`
-        );
+    if (mode === 'disabled' && (captchaVisivel || !(await botaoProsseguir.isEnabled()))) {
+      throw new Error(await this.erroCaptchaBloqueando(botaoProsseguir));
+    }
+
+    throw new Error(await this.erroProsseguirDesabilitado(botaoProsseguir));
+  }
+
+  private async erroCaptchaBloqueando(botaoProsseguir: Locator): Promise<string> {
+    const buttonText = (await botaoProsseguir.textContent())?.trim();
+    const disabled = await botaoProsseguir.getAttribute('disabled');
+    const captchaVisivel = await this.isCaptchaVisivel();
+
+    return [
+      'CAPTCHA_BLOQUEOU_PROSSEGUIR',
+      `url=${this.page.url()}`,
+      `text="${buttonText}"`,
+      `disabled=${disabled}`,
+      `captchaVisivel=${captchaVisivel}`,
+      `captchaMode=${process.env.CAPTCHA_MODE || 'manual'}`,
+    ].join(' ');
+  }
+
+  private async erroProsseguirDesabilitado(botaoProsseguir: Locator): Promise<string> {
+    const buttonText = (await botaoProsseguir.textContent())?.trim();
+    const disabled = await botaoProsseguir.getAttribute('disabled');
+
+    return `PROSSEGUIR_BOTAO_DESABILITADO url=${this.page.url()} text="${buttonText}" disabled=${disabled}`;
+  }
+
+  private async estaNaTelaDataHora(): Promise<boolean> {
+    if (/\/agendamentos\/novo\/data-e-hora/i.test(this.page.url())) {
+      return true;
+    }
+
+    return this.page
+      .waitForURL(/\/agendamentos\/novo\/data-e-hora/i, { timeout: 500 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  private async aguardarTelaDataHoraOpcional(timeoutMs: number): Promise<void> {
+    await this.page
+      .waitForURL(/\/agendamentos\/novo\/data-e-hora/i, { timeout: timeoutMs })
+      .catch(() => undefined);
+  }
+
+  private async isCaptchaVisivel(): Promise<boolean> {
+    const captchaIframe = this.page.locator('iframe[src*="recaptcha"], iframe[src*="api2/anchor"]');
+    const captchaTexto = this.page.getByText(/nao sou um robo|n.o sou um rob.|selecione todas as imagens/i);
+
+    return (
+      (await captchaIframe.count().catch(() => 0)) > 0 ||
+      (await captchaTexto.count().catch(() => 0)) > 0
+    );
+  }
+
+  private async estaTelaDeLoginSmart(): Promise<boolean> {
+    await this.page.waitForTimeout(1_500);
+
+    const loginMarkers = [
+      this.page.getByText(/SMART/i).first(),
+      this.page.getByText(/usuario|senha/i).first(),
+      this.page.getByRole('button', { name: /acessar|entrar|login/i }).first(),
+      this.page.getByPlaceholder(/usuario|login|senha/i).first(),
+    ];
+
+    for (const locator of loginMarkers) {
+      if (await locator.isVisible().catch(() => false)) {
+        return true;
       }
     }
 
-    await botaoProsseguir.click();
+    return false;
   }
 }

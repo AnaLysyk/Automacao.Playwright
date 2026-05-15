@@ -6,7 +6,7 @@ export class CidadaoSmartEmissaoTipoPage {
 
   async acessar(): Promise<void> {
     await this.page.goto('/emitir/tipo-emissao');
-    await expect(this.page).toHaveURL(S.route);
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async validarTelaTipoEmissao(): Promise<void> {

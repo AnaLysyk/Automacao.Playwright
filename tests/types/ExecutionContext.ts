@@ -29,7 +29,7 @@ export type KnownIssueRecord = KnownIssue & {
   detectedAt: string;
 };
 
-// Eu uso este contexto como memória compartilhada da execução entre agents, relatório e evidências.
+// Contexto compartilhado entre agents, relatorio e evidencias da execucao.
 export type ExecutionContext = {
   flowName: string;
   startedAt: string;
@@ -48,7 +48,7 @@ export type ExecutionContext = {
   protocolo?: string;
   captchaStatus?: 'nao-detectado' | 'manual' | 'disabled' | 'test' | 'expirado';
   captureStatus?: 'nao-iniciada' | 'manual' | 'fake-video' | 'disabled' | 'preview-detectado' | 'capturada' | 'falha';
-  emailCodeStatus?: 'env' | 'manual' | 'gmail-api' | 'internal-api' | 'log' | 'validado';
+  emailCodeStatus?: 'env' | 'manual' | 'imap' | 'gmail-api' | 'internal-api' | 'log' | 'validado';
   evidenceDir?: string;
   evidences: EvidenceRecord[];
   steps: StepRecord[];

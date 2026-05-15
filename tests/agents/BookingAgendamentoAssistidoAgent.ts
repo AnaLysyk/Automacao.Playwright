@@ -15,6 +15,7 @@ import { getServicePointForTest } from '../support/data/getServicePointForTest';
 import { loadEnvConfig, validateManualAssistedEnv } from '../config/env';
 import { knownIssues, KnownIssue } from '../config/knownIssues';
 import { ExecutionContext } from '../types/ExecutionContext';
+import { salvarProtocoloGerado } from '../support/reports/protocolos';
 
 export class BookingAgendamentoAssistidoAgent {
   private readonly localPage: CidadaoSmartAgendamentoLocalPage;
@@ -72,7 +73,7 @@ export class BookingAgendamentoAssistidoAgent {
    * Eu executo o fluxo completo assistido em etapas rastreaveis.
    * Se o dry run estiver ativo, eu paro no resumo para nao confirmar uma solicitacao real.
    */
-  async executarFluxoCompleto(): Promise<void> {
+  async executarFluxoCompleto(): Promise<ExecutionContext> {
     validateManualAssistedEnv(this.context.env);
     this.validarMassaMinima();
 
@@ -110,7 +111,7 @@ export class BookingAgendamentoAssistidoAgent {
           description: 'Dry run encerrado no resumo por seguranca',
           status: 'warning',
         });
-        return;
+        return this.context;
       }
 
       await this.stepAgent.executar('Abrir autenticacao', () => this.avancarParaAutenticacao(), {
@@ -125,6 +126,7 @@ export class BookingAgendamentoAssistidoAgent {
 
       this.context.status = 'passed';
       console.log(`[BOOKING] Fluxo assistido finalizado. Protocolo: ${this.context.protocolo || 'nao capturado'}`);
+      return this.context;
     } catch (error) {
       const category = this.failureClassifier.classify(error);
       this.context.status = 'failed';
@@ -313,6 +315,7 @@ export class BookingAgendamentoAssistidoAgent {
     await this.confirmacaoPage.validarTelaConfirmacao();
     await this.confirmacaoPage.validarProtocoloGerado();
     this.context.protocolo = await this.confirmacaoPage.obterProtocolo();
+    this.salvarProtocoloParaReuso();
 
     const postoExibido = await this.confirmacaoPage.obterPostoAtendimentoVisivel();
     if (postoExibido) {
@@ -348,6 +351,25 @@ export class BookingAgendamentoAssistidoAgent {
     this.context.knownIssues.push({
       ...issue,
       detectedAt: new Date().toISOString(),
+    });
+  }
+
+  private salvarProtocoloParaReuso(): void {
+    if (!this.context.protocolo) return;
+
+    salvarProtocoloGerado({
+      fluxo: this.context.flowName,
+      ambiente: this.context.env.cidadaoSmartBaseUrl,
+      postoSelecionado: this.context.postoSelecionado,
+      protocolo: this.context.protocolo,
+      status: 'CONFIRMED',
+      cpf: this.bookingData.cpf,
+      nome: this.bookingData.nome,
+      dataNascimento: this.bookingData.dataNascimento,
+      email: this.bookingData.email,
+      telefone: this.bookingData.telefone,
+      evidenceDir: this.evidenceAgent.getOutputDir() || undefined,
+      dataExecucao: new Date().toISOString(),
     });
   }
 }

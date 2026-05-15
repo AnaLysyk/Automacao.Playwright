@@ -1,14 +1,14 @@
-import { test } from '../fixtures';
-import { CidadaoSmartAgendamentoAutenticacaoPage } from '../pages/CidadaoSmartAgendamentoAutenticacaoPage';
-import { CidadaoSmartAgendamentoConfirmacaoPage } from '../pages/CidadaoSmartAgendamentoConfirmacaoPage';
-import { CidadaoSmartAgendamentoDataHoraPage } from '../pages/CidadaoSmartAgendamentoDataHoraPage';
-import { CidadaoSmartAgendamentoLocalPage } from '../pages/CidadaoSmartAgendamentoLocalPage';
-import { CidadaoSmartAgendamentoResumoPage } from '../pages/CidadaoSmartAgendamentoResumoPage';
-import { cidadaoSmartTestData } from '../support/data/cidadaoSmartTestData';
-import { getServicePointForTest } from '../support/data/getServicePointForTest';
-import { obterCodigoSegurancaParaAutenticacao } from '../support/email/obterCodigoSeguranca';
-import { prosseguirOuBloquearPorCaptcha } from '../support/flows/cidadaoSmartFlows';
-import { salvarProtocoloGerado } from '../support/reports/protocolos';
+import { test } from '../../fixtures';
+import { CidadaoSmartAgendamentoAutenticacaoPage } from '../../pages/CidadaoSmartAgendamentoAutenticacaoPage';
+import { CidadaoSmartAgendamentoConfirmacaoPage } from '../../pages/CidadaoSmartAgendamentoConfirmacaoPage';
+import { CidadaoSmartAgendamentoDataHoraPage } from '../../pages/CidadaoSmartAgendamentoDataHoraPage';
+import { CidadaoSmartAgendamentoLocalPage } from '../../pages/CidadaoSmartAgendamentoLocalPage';
+import { CidadaoSmartAgendamentoResumoPage } from '../../pages/CidadaoSmartAgendamentoResumoPage';
+import { cidadaoSmartTestData } from '../../support/data/cidadaoSmartTestData';
+import { getServicePointForTest } from '../../support/data/getServicePointForTest';
+import { obterCodigoSegurancaParaAutenticacao } from '../../support/email/obterCodigoSeguranca';
+import { prosseguirOuBloquearPorCaptcha } from '../../support/flows/cidadaoSmartFlows';
+import { salvarProtocoloGerado } from '../../support/reports/protocolos';
 
 test.describe('Cidadao Smart - Agendamento presencial', () => {
   test('deve confirmar agendamento no posto selecionado com CPF valido', async ({ page }) => {
@@ -103,6 +103,12 @@ test.describe('Cidadao Smart - Agendamento presencial', () => {
       ambiente: process.env.CIDADAO_SMART_BASE_URL || 'nao-configurado',
       postoSelecionado: selectedServicePoint.nome,
       protocolo,
+      status: 'CONFIRMED',
+      cpf: dados.cpfSemMascara,
+      nome: dados.nome,
+      dataNascimento: dados.dataNascimento,
+      email: dados.email,
+      telefone: dados.telefoneSemMascara,
       dataExecucao: new Date().toISOString(),
     });
 

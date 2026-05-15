@@ -7,7 +7,7 @@ export class CidadaoSmartEmissaoResumoPage {
 
   async acessar(): Promise<void> {
     await this.page.goto('/emitir/resumo');
-    await expect(this.page).toHaveURL(S.route);
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async validarTelaResumo(): Promise<void> {

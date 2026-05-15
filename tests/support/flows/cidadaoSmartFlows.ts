@@ -1,4 +1,7 @@
-import { Page, test } from "@playwright/test";
+import { Page, test } from '@playwright/test';
+import { CidadaoSmartAgendamentoDataHoraPage } from '../../pages/CidadaoSmartAgendamentoDataHoraPage';
+import { CidadaoSmartAgendamentoLocalPage } from '../../pages/CidadaoSmartAgendamentoLocalPage';
+import { handleCaptcha } from '../captcha/handleCaptcha';
 
 export async function prosseguirOuBloquearPorCaptcha(
   localPage: { prosseguir(): Promise<void> }
@@ -7,12 +10,11 @@ export async function prosseguirOuBloquearPorCaptcha(
     await localPage.prosseguir();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    const captchaDisabled = process.env.CAPTCHA_MODE === "disabled";
-    const prosseguirBloqueado = /toBeEnabled|disabled|Prosseguir/i.test(message);
+    const captchaBloqueou = /CAPTCHA_BLOQUEOU_PROSSEGUIR/i.test(message);
 
     test.skip(
-      captchaDisabled && prosseguirBloqueado,
-      "Cenario bloqueado: CAPTCHA real continua ativo no ambiente. CAPTCHA_MODE=disabled exige bypass oficial de QA."
+      captchaBloqueou,
+      'Cenario bloqueado: CAPTCHA real nao liberou o botao Prosseguir. Use fluxo manual-assisted ou bypass oficial de QA.'
     );
 
     throw error;
@@ -20,20 +22,14 @@ export async function prosseguirOuBloquearPorCaptcha(
 }
 
 /**
- * Helper para fluxo reutilizável: chegar na tela Data e Hora.
- * Usado pelos specs de validação para evitar duplicação.
+ * Fluxo reutilizavel para chegar na tela Data e Hora.
+ * Mantem as specs menores e evita duplicacao de passos de localizacao.
  */
 export async function chegarNaTelaDataHora(
   page: Page,
-  cidade: string = "Florianópolis",
-  posto: string = "PCI - FLORIANÓPOLIS - Top Tower"
+  cidade: string = 'Florianópolis',
+  posto: string = 'PCI - FLORIANÓPOLIS - Top Tower'
 ) {
-  // Importa aqui para evitar dependência circular
-  const { CidadaoSmartAgendamentoLocalPage } = await import(
-    "../../pages/CidadaoSmartAgendamentoLocalPage.js"
-  );
-  const { handleCaptcha } = await import("../captcha/handleCaptcha.js");
-
   const localPage = new CidadaoSmartAgendamentoLocalPage(page);
 
   await localPage.acessar();
@@ -46,8 +42,8 @@ export async function chegarNaTelaDataHora(
 }
 
 /**
- * Helper para fluxo reutilizável: chegar na tela de Resumo.
- * Retorna data e horário selecionados para validação posterior.
+ * Fluxo reutilizavel para chegar na tela de Resumo.
+ * Retorna data e horario selecionados para validacao posterior.
  */
 export async function chegarNaTelaResumo(
   page: Page,
@@ -58,13 +54,9 @@ export async function chegarNaTelaResumo(
     cpf?: string;
     telefone: string;
   },
-  dataAgendamento: string = "18/05/2026",
-  horarioAgendamento: string = "08:00"
+  dataAgendamento: string = '18/05/2026',
+  horarioAgendamento: string = '08:00'
 ) {
-  const { CidadaoSmartAgendamentoDataHoraPage } = await import(
-    "../../pages/CidadaoSmartAgendamentoDataHoraPage.js"
-  );
-
   const dataHoraPage = new CidadaoSmartAgendamentoDataHoraPage(page);
 
   await dataHoraPage.validarTelaDataHora();

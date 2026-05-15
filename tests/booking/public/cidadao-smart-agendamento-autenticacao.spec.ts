@@ -1,9 +1,9 @@
-import { test } from '../fixtures';
-import { CidadaoSmartAgendamentoAutenticacaoPage } from '../pages/CidadaoSmartAgendamentoAutenticacaoPage';
-import { CidadaoSmartAgendamentoDataHoraPage } from '../pages/CidadaoSmartAgendamentoDataHoraPage';
-import { CidadaoSmartAgendamentoLocalPage } from '../pages/CidadaoSmartAgendamentoLocalPage';
-import { CidadaoSmartAgendamentoResumoPage } from '../pages/CidadaoSmartAgendamentoResumoPage';
-import { cidadaoSmartTestData } from '../support/data/cidadaoSmartTestData';
+import { test } from '../../fixtures';
+import { CidadaoSmartAgendamentoAutenticacaoPage } from '../../pages/CidadaoSmartAgendamentoAutenticacaoPage';
+import { CidadaoSmartAgendamentoDataHoraPage } from '../../pages/CidadaoSmartAgendamentoDataHoraPage';
+import { CidadaoSmartAgendamentoLocalPage } from '../../pages/CidadaoSmartAgendamentoLocalPage';
+import { CidadaoSmartAgendamentoResumoPage } from '../../pages/CidadaoSmartAgendamentoResumoPage';
+import { cidadaoSmartTestData } from '../../support/data/cidadaoSmartTestData';
 
 test.describe('Cidadao Smart - Autenticacao', () => {
   test('deve validar codigo de seguranca e seguir para confirmacao', async ({ page }) => {

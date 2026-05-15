@@ -14,7 +14,11 @@ export class FailureClassifierAgent {
   classify(error: unknown): FailureCategory {
     const message = error instanceof Error ? error.message : String(error || '');
 
-    if (/captcha|recaptcha|robo|robô/i.test(message)) {
+    if (/strict mode|selector|locator|not found|nao encontrado|não encontrado/i.test(message)) {
+      return 'automacao';
+    }
+
+    if (/expired.*captcha|captcha.*expired|EXPIRED_CAPTCHA|captcha|recaptcha|robo|robô/i.test(message)) {
       return 'captcha';
     }
 
@@ -42,7 +46,7 @@ export class FailureClassifierAgent {
       return 'ambiente';
     }
 
-    if (/timeout|timed out|strict mode|selector|locator|not found|nao encontrado|não encontrado/i.test(message)) {
+    if (/timeout|timed out/i.test(message)) {
       return 'automacao';
     }
 

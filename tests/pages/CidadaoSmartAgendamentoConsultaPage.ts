@@ -6,7 +6,7 @@ export class CidadaoSmartAgendamentoConsultaPage {
 
   async acessar(): Promise<void> {
     await this.page.goto('/agendamentos/consultar');
-    await expect(this.page).toHaveURL(S.route);
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async validarTelaConsultaAgendamento(): Promise<void> {

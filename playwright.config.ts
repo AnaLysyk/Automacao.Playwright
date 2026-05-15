@@ -6,6 +6,35 @@ import path from 'path';
 dotenv.config({ path: '.env.local' });
 dotenv.config();
 
+const automatedRunScripts = new Set([
+  'test:all',
+  'test:ci',
+  'test:regressao',
+  'test:booking:public',
+  'test:booking:e2e',
+  'test:agendamento',
+  'test:agendamento:local',
+  'test:agendamento:data-hora',
+  'test:agendamento:validacoes',
+  'test:emissao',
+  'test:consulta',
+  'test:2via',
+  'test:e2e',
+  'test:smoke',
+]);
+
+// Scripts automaticos nao devem parar em page.pause().
+// Fluxos com intervencao humana continuam nos comandos manual-assisted.
+if (automatedRunScripts.has(process.env.npm_lifecycle_event || '') || process.env.CI) {
+  if ((process.env.CAPTCHA_MODE || 'manual') === 'manual') {
+    process.env.CAPTCHA_MODE = 'disabled';
+  }
+
+  if ((process.env.EXECUTION_MODE || 'manual-assisted') === 'manual-assisted') {
+    process.env.EXECUTION_MODE = 'ci';
+  }
+}
+
 // Eu uso PW_SLOW_MO para deixar a execução assistida mais visual.
 const slowMo = Number(process.env.PW_SLOW_MO || 0);
 const executionMode = process.env.EXECUTION_MODE || 'manual-assisted';

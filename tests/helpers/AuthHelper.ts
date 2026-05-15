@@ -1,14 +1,15 @@
-import { Page } from '@playwright/test';
+import { Locator, Page } from '@playwright/test';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
 
 /**
- * Helper para autenticação em sistemas com login por email/password
+ * Centraliza login e logout dos sistemas usados pelos testes.
+ * Mantem credenciais fora do codigo: tudo vem do .env.local.
  */
 export class AuthHelper {
   /**
-   * Fazer login no Booking Admin
+   * Entra no Booking Admin usando usuario/senha configurados no ambiente.
    */
   static async loginBookingAdmin(page: Page): Promise<void> {
     const user = process.env.BOOKING_ADMIN_USER || '';
@@ -17,37 +18,27 @@ export class AuthHelper {
 
     if (!user || !password || !baseUrl) {
       throw new Error(
-        'Variáveis BOOKING_ADMIN_USER, BOOKING_ADMIN_PASSWORD e BOOKING_ADMIN_BASE_URL obrigatórias'
+        'Variaveis BOOKING_ADMIN_USER, BOOKING_ADMIN_PASSWORD e BOOKING_ADMIN_BASE_URL obrigatorias'
       );
     }
 
-    // Navegar para login
-    await page.goto(baseUrl, { waitUntil: 'networkidle' });
-
-    // Preencher credenciais
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
     await page.fill('input[type="email"], input[name="email"], input[id*="email"]', user);
     await page.fill('input[type="password"], input[name="password"]', password);
-
-    // Clicar em submit
     await page.click('button[type="submit"], button:has-text("Login"), button:has-text("Entrar")');
-
-    // Aguardar navegação pós-login
     await page.waitForNavigation({ waitUntil: 'networkidle' });
 
-    // Validar se está autenticado (não está mais em /login)
     if (page.url().includes('/login')) {
-      throw new Error(
-        'Falha no login Booking Admin. URL ainda contém /login. Verifique credenciais.'
-      );
+      throw new Error('Falha no login Booking Admin. URL ainda contem /login. Verifique credenciais.');
     }
   }
 
   /**
-   * Fazer logout no Booking Admin
+   * Sai do Booking Admin quando o menu de usuario esta disponivel.
+   * Falha de logout gera aviso, mas nao quebra o teste que ja validou o fluxo principal.
    */
   static async logoutBookingAdmin(page: Page): Promise<void> {
     try {
-      // Tentar encontrar menu do usuário (pode estar em dropdown, ícone, etc)
       const userMenuSelectors = [
         '[data-testid="user-menu"]',
         '.user-dropdown',
@@ -61,7 +52,7 @@ export class AuthHelper {
       let menuFound = false;
       for (const selector of userMenuSelectors) {
         const element = page.locator(selector).first();
-        if (await element.isVisible({ timeout: 3000 }).catch(() => false)) {
+        if (await element.isVisible({ timeout: 3_000 }).catch(() => false)) {
           await element.click();
           menuFound = true;
           break;
@@ -69,10 +60,9 @@ export class AuthHelper {
       }
 
       if (!menuFound) {
-        throw new Error('Menu do usuário não encontrado');
+        throw new Error('Menu do usuario nao encontrado');
       }
 
-      // Clicar em logout/sair
       const logoutSelectors = [
         'text=Logout',
         'text=Sair',
@@ -87,7 +77,7 @@ export class AuthHelper {
       let logoutClicked = false;
       for (const selector of logoutSelectors) {
         const element = page.locator(selector).first();
-        if (await element.isVisible({ timeout: 2000 }).catch(() => false)) {
+        if (await element.isVisible({ timeout: 2_000 }).catch(() => false)) {
           await element.click();
           logoutClicked = true;
           break;
@@ -95,19 +85,18 @@ export class AuthHelper {
       }
 
       if (!logoutClicked) {
-        throw new Error('Botão de logout não encontrado');
+        throw new Error('Botao de logout nao encontrado');
       }
 
-      // Aguardar redirecionamento para login
       await page.waitForNavigation({ waitUntil: 'networkidle' });
     } catch (error) {
       console.warn('Erro ao fazer logout:', error);
-      // Não lançar erro, apenas avisar
     }
   }
 
   /**
-   * Fazer login no SMART interno
+   * Entra no SMART interno.
+   * O metodo e idempotente: se a sessao ja esta aberta, ele apenas continua.
    */
   static async loginSmart(page: Page): Promise<void> {
     const user = process.env.SMART_USER || '';
@@ -115,31 +104,59 @@ export class AuthHelper {
     const baseUrl = process.env.SMART_BASE_URL || '';
 
     if (!user || !password || !baseUrl) {
-      throw new Error(
-        'Variáveis SMART_USER, SMART_PASSWORD e SMART_BASE_URL obrigatórias'
-      );
+      throw new Error('Variaveis SMART_USER, SMART_PASSWORD e SMART_BASE_URL obrigatorias');
     }
 
-    // Navegar para login
     await page.goto(baseUrl, { waitUntil: 'networkidle' });
 
-    // Preencher credenciais
-    await page.fill('input[type="email"], input[name="email"]', user);
-    await page.fill('input[type="password"], input[name="password"]', password);
+    const campoSenha = page.locator('input[type="password"], input[name*="password" i], input[name*="senha" i]').first();
+    const telaLoginVisivel = await campoSenha.isVisible({ timeout: 5_000 }).catch(() => false);
 
-    // Clicar em submit
-    await page.click('button[type="submit"]');
+    if (!telaLoginVisivel) {
+      console.log('[SMART] Sessao ja autenticada ou tela de login nao exibida.');
+      return;
+    }
 
-    // Aguardar navegação
-    await page.waitForNavigation({ waitUntil: 'networkidle' });
+    const campoUsuario = await AuthHelper.primeiroCampoVisivel([
+      page.getByLabel(/usuario|usu.rio|login|email/i).first(),
+      page.getByPlaceholder(/usuario|usu.rio|login|email/i).first(),
+      page.locator('input[type="email"], input[name*="email" i], input[name*="user" i], input[name*="usuario" i], input[name*="login" i]').first(),
+      page.locator('input:not([type="password"])').first(),
+    ]);
+
+    await campoUsuario.fill(user);
+    await campoSenha.fill(password);
+
+    const botaoEntrar = await AuthHelper.primeiroCampoVisivel([
+      page.getByRole('button', { name: /entrar|acessar|login|sign in/i }).first(),
+      page.locator('button[type="submit"]').first(),
+    ]);
+
+    await Promise.all([
+      page.waitForLoadState('networkidle').catch(() => undefined),
+      botaoEntrar.click(),
+    ]);
 
     if (page.url().includes('/login')) {
-      throw new Error('Falha no login SMART. URL ainda contém /login.');
+      throw new Error('Falha no login SMART. URL ainda contem /login.');
     }
   }
 
   /**
-   * Fazer logout no SMART
+   * Retorna o primeiro locator visivel de uma lista de fallbacks.
+   */
+  private static async primeiroCampoVisivel(locators: Locator[]): Promise<Locator> {
+    for (const locator of locators) {
+      if (await locator.isVisible({ timeout: 2_000 }).catch(() => false)) {
+        return locator;
+      }
+    }
+
+    throw new Error('Campo esperado nao encontrado.');
+  }
+
+  /**
+   * Sai do SMART quando o menu da sessao aparece na tela.
    */
   static async logoutSmart(page: Page): Promise<void> {
     try {
@@ -153,7 +170,7 @@ export class AuthHelper {
       let menuFound = false;
       for (const selector of userMenuSelectors) {
         const element = page.locator(selector).first();
-        if (await element.isVisible({ timeout: 3000 }).catch(() => false)) {
+        if (await element.isVisible({ timeout: 3_000 }).catch(() => false)) {
           await element.click();
           menuFound = true;
           break;
@@ -161,7 +178,7 @@ export class AuthHelper {
       }
 
       if (!menuFound) {
-        throw new Error('Menu do usuário não encontrado');
+        throw new Error('Menu do usuario nao encontrado');
       }
 
       const logoutSelectors = ['text=Sair', 'text=Logout', 'a[href*="logout"]'];
@@ -169,7 +186,7 @@ export class AuthHelper {
       let logoutClicked = false;
       for (const selector of logoutSelectors) {
         const element = page.locator(selector).first();
-        if (await element.isVisible({ timeout: 2000 }).catch(() => false)) {
+        if (await element.isVisible({ timeout: 2_000 }).catch(() => false)) {
           await element.click();
           logoutClicked = true;
           break;
@@ -177,7 +194,7 @@ export class AuthHelper {
       }
 
       if (!logoutClicked) {
-        throw new Error('Botão de logout não encontrado');
+        throw new Error('Botao de logout nao encontrado');
       }
 
       await page.waitForNavigation({ waitUntil: 'networkidle' });
@@ -187,16 +204,14 @@ export class AuthHelper {
   }
 
   /**
-   * Verificar se está autenticado
+   * Verifica sinais simples de sessao autenticada.
    */
   static async isAuthenticated(page: Page): Promise<boolean> {
     try {
-      // Se a URL contém /login, não está autenticado
       if (page.url().includes('/login')) {
         return false;
       }
 
-      // Se conseguir encontrar elemento que indica usuário logado, está autenticado
       const userIndicators = [
         '[data-testid="user-menu"]',
         '.user-dropdown',
@@ -206,7 +221,7 @@ export class AuthHelper {
 
       for (const selector of userIndicators) {
         const element = page.locator(selector).first();
-        if (await element.isVisible({ timeout: 1000 }).catch(() => false)) {
+        if (await element.isVisible({ timeout: 1_000 }).catch(() => false)) {
           return true;
         }
       }
@@ -218,12 +233,9 @@ export class AuthHelper {
   }
 
   /**
-   * Fazer login no Cidadão Smart (via API ou UI)
-   * Nota: Cidadão Smart geralmente não tem login tradicional
+   * Mantem o ponto de extensao para login via API do Cidadao Smart.
    */
   static async loginCidadaoSmartViaApi(token: string): Promise<string> {
-    // Placeholder para login via API Token
-    // Implementar conforme integração com Keycloak
     return token;
   }
 }

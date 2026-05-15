@@ -1,14 +1,14 @@
-import { expect, test } from '../fixtures';
-import { CidadaoSmartAgendamentoDataHoraPage } from '../pages/CidadaoSmartAgendamentoDataHoraPage';
-import { CidadaoSmartAgendamentoLocalPage } from '../pages/CidadaoSmartAgendamentoLocalPage';
+import { expect, test } from '../../fixtures';
+import { CidadaoSmartAgendamentoDataHoraPage } from '../../pages/CidadaoSmartAgendamentoDataHoraPage';
+import { CidadaoSmartAgendamentoLocalPage } from '../../pages/CidadaoSmartAgendamentoLocalPage';
 import {
   birthDateExactly16,
   birthDateFuture,
   birthDateOver16,
   birthDateUnder16,
-} from '../support/dates/birthDateFactory';
-import { cidadaoSmartTestData } from '../support/data/cidadaoSmartTestData';
-import { prosseguirOuBloquearPorCaptcha } from '../support/flows/cidadaoSmartFlows';
+} from '../../support/dates/birthDateFactory';
+import { cidadaoSmartTestData } from '../../support/data/cidadaoSmartTestData';
+import { prosseguirOuBloquearPorCaptcha } from '../../support/flows/cidadaoSmartFlows';
 
 const dadosPessoa = cidadaoSmartTestData.requerenteDemo;
 

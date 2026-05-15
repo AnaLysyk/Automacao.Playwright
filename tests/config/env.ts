@@ -5,7 +5,7 @@ dotenv.config();
 
 export type CaptchaMode = 'manual' | 'disabled' | 'test';
 export type CaptureMode = 'manual' | 'fake-video' | 'disabled';
-export type EmailCodeMode = 'manual' | 'env' | 'gmail-api' | 'internal-api' | 'log';
+export type EmailCodeMode = 'manual' | 'env' | 'imap' | 'gmail-api' | 'internal-api' | 'log';
 export type ExecutionMode = 'manual-assisted' | 'local' | 'ci';
 
 export type EnvConfig = {
@@ -29,6 +29,16 @@ export type EnvConfig = {
   gmailTokenPath?: string;
   gmailCodeQuery: string;
   gmailCodeRegex: string;
+  imapHost?: string;
+  imapPort: number;
+  imapSecure: boolean;
+  imapUser?: string;
+  imapPassword?: string;
+  imapMailbox: string;
+  imapFromFilter?: string;
+  emailPollTimeoutMs: number;
+  emailPollIntervalMs: number;
+  emailCodeRegex: string;
   executionMode: ExecutionMode;
   slowMo: number;
   evidenceDir: string;
@@ -50,12 +60,12 @@ const envDefaults: Record<string, Pick<EnvConfig, 'cidadaoSmartBaseUrl' | 'booki
   },
 };
 
-// Eu removo barras finais para evitar URLs duplicadas quando os testes montam rotas.
+// Remove barras finais para evitar URLs duplicadas quando os testes montam rotas.
 function normalizeUrl(url: string): string {
   return url.replace(/\/+$/, '');
 }
 
-// Eu leio números de ambiente com fallback para evitar NaN quebrando o Playwright config.
+// Le numeros do ambiente com fallback para evitar NaN no Playwright config.
 function readNumber(name: string, fallback: number): number {
   const raw = process.env[name];
   if (!raw) return fallback;
@@ -64,7 +74,7 @@ function readNumber(name: string, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-// Eu leio booleanos aceitando apenas "true" como valor ativo.
+// Le booleanos aceitando apenas "true" como valor ativo.
 function readBoolean(name: string, fallback: boolean): boolean {
   const raw = process.env[name];
   if (!raw) return fallback;
@@ -72,7 +82,7 @@ function readBoolean(name: string, fallback: boolean): boolean {
   return raw.trim().toLowerCase() === 'true';
 }
 
-// Eu valido CAPTCHA_MODE para impedir erro silencioso por typo no .env.local.
+// Valida CAPTCHA_MODE para impedir erro silencioso por typo no .env.local.
 function readCaptchaMode(): CaptchaMode {
   const mode = (process.env.CAPTCHA_MODE || 'manual').trim().toLowerCase();
   if (mode === 'manual' || mode === 'disabled' || mode === 'test') return mode;
@@ -80,7 +90,7 @@ function readCaptchaMode(): CaptchaMode {
   throw new Error(`[ENV] CAPTCHA_MODE invalido: ${mode}. Use manual, disabled ou test.`);
 }
 
-// Eu valido CAPTURE_MODE porque captura manual, fake-video e disabled têm comportamentos diferentes.
+// Valida CAPTURE_MODE porque manual, fake-video e disabled mudam o fluxo.
 function readCaptureMode(): CaptureMode {
   const mode = (process.env.CAPTURE_MODE || 'manual').trim().toLowerCase();
   if (mode === 'manual' || mode === 'fake-video' || mode === 'disabled') return mode;
@@ -88,15 +98,24 @@ function readCaptureMode(): CaptureMode {
   throw new Error(`[ENV] CAPTURE_MODE invalido: ${mode}. Use manual, fake-video ou disabled.`);
 }
 
-// Eu valido EMAIL_CODE_MODE para deixar claro como o código de segurança será obtido.
+// Valida EMAIL_CODE_MODE para deixar claro como o codigo de seguranca sera obtido.
 function readEmailCodeMode(): EmailCodeMode {
   const mode = (process.env.EMAIL_CODE_MODE || 'manual').trim().toLowerCase();
-  if (mode === 'manual' || mode === 'env' || mode === 'gmail-api' || mode === 'internal-api' || mode === 'log') return mode;
+  if (
+    mode === 'manual' ||
+    mode === 'env' ||
+    mode === 'imap' ||
+    mode === 'gmail-api' ||
+    mode === 'internal-api' ||
+    mode === 'log'
+  ) {
+    return mode;
+  }
 
-  throw new Error(`[ENV] EMAIL_CODE_MODE invalido: ${mode}. Use manual, env, gmail-api, internal-api ou log.`);
+  throw new Error(`[ENV] EMAIL_CODE_MODE invalido: ${mode}. Use manual, env, imap, gmail-api, internal-api ou log.`);
 }
 
-// Eu valido EXECUTION_MODE para separar execução assistida, local e CI.
+// Valida EXECUTION_MODE para separar execucao assistida, local e CI.
 function readExecutionMode(): ExecutionMode {
   const mode = (process.env.EXECUTION_MODE || 'manual-assisted').trim().toLowerCase();
   if (mode === 'manual-assisted' || mode === 'local' || mode === 'ci') return mode;
@@ -104,7 +123,7 @@ function readExecutionMode(): ExecutionMode {
   throw new Error(`[ENV] EXECUTION_MODE invalido: ${mode}. Use manual-assisted, local ou ci.`);
 }
 
-// Eu monto a configuração central que os agentes usam para não espalhar process.env pelo projeto.
+// Monta a configuracao central que os agents usam para nao espalhar process.env pelo projeto.
 export function loadEnvConfig(): EnvConfig {
   const targetEnv = (process.env.TARGET_ENV || '146').trim();
   const defaults = envDefaults[targetEnv] || envDefaults['146'];
@@ -130,6 +149,16 @@ export function loadEnvConfig(): EnvConfig {
     gmailTokenPath: process.env.GMAIL_TOKEN_PATH || '',
     gmailCodeQuery: process.env.GMAIL_CODE_QUERY || 'from:noreply newer_than:10m',
     gmailCodeRegex: process.env.GMAIL_CODE_REGEX || String.raw`\b\d{6}\b`,
+    imapHost: process.env.CIDADAO_SMART_EMAIL_IMAP_HOST || '',
+    imapPort: readNumber('CIDADAO_SMART_EMAIL_IMAP_PORT', 993),
+    imapSecure: readBoolean('CIDADAO_SMART_EMAIL_IMAP_SECURE', true),
+    imapUser: process.env.CIDADAO_SMART_EMAIL_IMAP_USER || '',
+    imapPassword: process.env.CIDADAO_SMART_EMAIL_IMAP_PASSWORD || '',
+    imapMailbox: process.env.CIDADAO_SMART_EMAIL_IMAP_MAILBOX || 'INBOX',
+    imapFromFilter: process.env.CIDADAO_SMART_EMAIL_FROM_FILTER || '',
+    emailPollTimeoutMs: readNumber('CIDADAO_SMART_EMAIL_POLL_TIMEOUT_MS', 120_000),
+    emailPollIntervalMs: readNumber('CIDADAO_SMART_EMAIL_POLL_INTERVAL_MS', 5_000),
+    emailCodeRegex: process.env.CIDADAO_SMART_EMAIL_CODE_REGEX || process.env.GMAIL_CODE_REGEX || String.raw`\b\d{6}\b`,
     executionMode: readExecutionMode(),
     slowMo: readNumber('PW_SLOW_MO', 300),
     evidenceDir: process.env.EVIDENCE_DIR || 'test-results',
@@ -137,7 +166,7 @@ export function loadEnvConfig(): EnvConfig {
   };
 }
 
-// Eu falho cedo quando falta configuração básica para um fluxo assistido.
+// Falha cedo quando falta configuracao basica para um fluxo assistido.
 export function validateManualAssistedEnv(config: EnvConfig): void {
   const missing: string[] = [];
 
@@ -151,6 +180,12 @@ export function validateManualAssistedEnv(config: EnvConfig): void {
 
   if (config.emailCodeMode === 'env' && !config.securityCode) {
     missing.push('CIDADAO_SMART_SECURITY_CODE');
+  }
+
+  if (config.emailCodeMode === 'imap') {
+    if (!config.imapHost) missing.push('CIDADAO_SMART_EMAIL_IMAP_HOST');
+    if (!config.imapUser) missing.push('CIDADAO_SMART_EMAIL_IMAP_USER');
+    if (!config.imapPassword) missing.push('CIDADAO_SMART_EMAIL_IMAP_PASSWORD');
   }
 
   if (missing.length > 0) {
