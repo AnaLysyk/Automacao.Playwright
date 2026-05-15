@@ -90,5 +90,12 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
       },
     },
+    {
+      name: 'mobile-chromium',
+      use: {
+        // Perfil mobile web para validar responsividade do Booking/Cidadao Smart.
+        ...devices['Pixel 5'],
+      },
+    },
   ],
 });

@@ -59,17 +59,35 @@ export class CidadaoSmartAgendamentoLocalPage {
    */
   async selecionarPosto(nomePosto: string): Promise<void> {
     const postoText = this.page.getByText(nomePosto, { exact: true }).first();
+    await expect(postoText).toBeVisible();
 
     // Alguns layouts exibem o nome dentro de um card; clicar no texto nem sempre
     // aciona a selecao. Primeiro tentamos clicar no ancestral clicavel.
     const card = postoText.locator('xpath=ancestor::div[contains(@class, "cursor-pointer")]');
     if ((await card.count()) > 0) {
-      await card.click();
+      await this.clicarPostoCard(card.first());
       await this.page.waitForTimeout(250);
       return;
     }
 
     await postoText.click();
+  }
+
+  private async clicarPostoCard(card: Locator): Promise<void> {
+    await card.scrollIntoViewIfNeeded();
+
+    try {
+      await card.click({ timeout: 5_000 });
+      return;
+    } catch (error) {
+      console.warn(`[BOOKING] Clique normal no card do posto falhou; usando fallback mobile. ${String(error)}`);
+    }
+
+    // No mobile, a barra fixa inferior e o recaptcha podem interceptar o ponto
+    // central do card. O fallback dispara o click no proprio elemento clicavel.
+    await card.evaluate((element: any) => {
+      element.click();
+    });
   }
 
   /**

@@ -11,6 +11,7 @@
     "test:debug": "playwright test --debug",
     "test:ui": "playwright test --ui",
     "test:booking:assistido": "playwright test tests/booking/manual-assisted/booking-agendamento-assistido.spec.ts --headed --project=chromium",
+    "test:booking:assistido:mobile": "playwright test tests/booking/manual-assisted/booking-agendamento-assistido.spec.ts --headed --project=mobile-chromium",
     "test:booking:debug": "playwright test tests/booking/manual-assisted/booking-agendamento-assistido.spec.ts --debug --project=chromium",
     "test:booking:public": "playwright test tests/booking/public --headed --project=chromium",
     "test:booking:e2e": "playwright test tests/e2e tests/booking/e2e --headed --project=chromium",
