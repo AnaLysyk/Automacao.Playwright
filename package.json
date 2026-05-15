@@ -6,11 +6,11 @@
     "typecheck": "tsc --noEmit",
     "test": "playwright test",
     "test:list": "playwright test --list",
-    "test:cidadao-smart": "playwright test tests/cidadao-smart --project=chromium",
-    "test:booking": "playwright test tests/booking --project=chromium",
-    "test:headed": "playwright test --headed --project=chromium",
-    "test:ui": "playwright test --ui",
-    "test:debug": "playwright test --debug --project=chromium"
+    "test:booking:assistido": "playwright test tests/booking/agendamento-presencial/agendamento-presencial.spec.ts --headed --project=chromium",
+    "test:booking": "playwright test tests/booking --headed --project=chromium",
+    "test:cidadao": "playwright test tests/cidadao-smart --headed --project=chromium",
+    "test:api": "playwright test tests/api --project=chromium",
+    "report": "playwright show-report"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",

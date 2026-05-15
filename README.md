@@ -12,8 +12,10 @@ Projeto de testes E2E Playwright para fluxos reais do Cidadao Smart e do Booking
 
 ```txt
 tests/
-  cidadao-smart/telas/
-  booking/telas/
+  booking/agendamento-presencial/
+  cidadao-smart/emissao-online/
+  cidadao-smart/consulta-pedido/
+  api/
 support/
   api/
   captcha/
@@ -21,12 +23,13 @@ support/
   email/
   fixtures/
   utils/
-assets/
-  imagens/
-  documentos/
+docs/
+  README_EXECUCAO.md
+  MAPA_FLUXOS.md
+  KNOWN_ISSUES.md
 ```
 
-Cada tela fica em uma pasta propria com `*.elements.ts`, `*.flow.ts`, `*.data.ts` e, quando existir teste funcional, `*.spec.ts`.
+Cada fluxo principal fica em uma pasta propria com `*.elements.ts`, `*.flow.ts`, `*.data.ts` e `*.spec.ts`.
 
 ## Configuracao
 
@@ -40,9 +43,10 @@ npx playwright install
 ## Execucao
 
 ```bash
-npx playwright test tests/cidadao-smart
-npx playwright test tests/booking
-npx playwright test tests/booking/telas/agendamento-presencial/agendamento-presencial.spec.ts
+npm run test:booking:assistido
+npm run test:booking
+npm run test:cidadao
+npm run test:api
 npm run test:list
 ```
 

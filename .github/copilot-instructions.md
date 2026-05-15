@@ -4,7 +4,7 @@ Este projeto automatiza somente Cidadao Smart e Booking com Playwright e TypeScr
 
 Regras:
 
-- Manter testes em `tests/cidadao-smart/telas/` ou `tests/booking/telas/`.
+- Manter testes em `tests/booking/agendamento-presencial/`, `tests/cidadao-smart/emissao-online/`, `tests/cidadao-smart/consulta-pedido/` ou `tests/api/`.
 - Manter locators apenas em `*.elements.ts`.
 - Manter acoes e validacoes reutilizaveis apenas em `*.flow.ts`.
 - Manter massa apenas em `*.data.ts`.

@@ -4,7 +4,7 @@ Este repositório automatiza somente Cidadão Smart e Booking / Agendamento com 
 
 ## Escopo
 
-- Manter testes em `tests/cidadao-smart/telas/` e `tests/booking/telas/`.
+- Manter testes principais em `tests/booking/agendamento-presencial/`, `tests/cidadao-smart/emissao-online/`, `tests/cidadao-smart/consulta-pedido/` e `tests/api/`.
 - Manter apoio compartilhado em `support/`.
 - Usar APIs apenas como apoio de massa, consulta, status e validação.
 - Não criar automação de Identity, dashboard genérico, login genérico ou SMART operador.
