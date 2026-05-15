@@ -12,11 +12,11 @@ export async function resolverCaptchaSePermitido(page: Page, testInfo?: TestInfo
   const env = loadEnv();
   const visivel = await captchaVisivel(page);
 
-  if (!visivel && env.captchaMode !== 'manual') {
+  if (!visivel) {
     return;
   }
 
-  if (visivel && env.captchaMode === 'disabled') {
+  if (env.captchaMode === 'disabled') {
     throw new Error('CAPTCHA_ATIVO_SEM_BYPASS_OFICIAL');
   }
 

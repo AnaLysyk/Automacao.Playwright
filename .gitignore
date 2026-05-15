@@ -14,6 +14,8 @@ playwright/.profiles/
 dist/
 coverage/
 *.log
+.git.zip
+*.zip
 
 assets/imagens/*
 !assets/imagens/.gitkeep
