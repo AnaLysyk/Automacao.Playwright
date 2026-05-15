@@ -1,51 +1,35 @@
-# Booking - Automacao Assistida
+# [ASSISTIDO] Booking manual-assisted
 
-Esta suite executa o fluxo E2E assistido do Booking / Agendamento Presencial consumido pelo Cidadao Smart.
+## Objetivo
 
-## Por que e assistida?
+Executar fluxos de Booking/Cidadao Smart que ainda precisam de QA durante a execucao.
 
-O fluxo ainda pode exigir:
+## Tipo de execucao
 
-- CAPTCHA manual;
-- codigo de verificacao enviado por e-mail.
+Assistida. Nao deve rodar em CI como regressao automatica.
 
-Enquanto esses pontos dependerem de intervencao humana, esta suite nao deve rodar em CI.
+## Comando principal
 
-## Como rodar
-
-```powershell
+```bash
 npm run test:booking:assistido
 ```
 
-Modo debug:
+Para 2a via expressa encadeada:
 
-```powershell
-npm run test:booking:debug
+```bash
+npm run test:2via:expressa:encadeada
 ```
 
-## O que valida
+## Pode entrar aqui
 
-- localizacao;
-- selecao de posto;
-- dados do requerente;
-- data disponivel;
-- horario disponivel;
-- resumo;
-- codigo de seguranca;
-- confirmacao;
-- protocolo quando o fluxo nao estiver em dry run.
+- Fluxos com CAPTCHA real.
+- Fluxos com codigo por e-mail manual ou assistido.
+- Fluxos que dependem de SMART manual.
+- E2E encadeado Booking + SMART + Cidadao.
 
-## Evidencias
+## Nao pode entrar aqui
 
-As evidencias ficam em:
+- Regressao automatica pura.
+- POC tecnica isolada.
+- Credenciais, codigos reais ou massa sensivel.
 
-```text
-test-results/booking/manual-assisted/<data-hora>/
-```
-
-Cada execucao gera screenshots por etapa e `resumo-execucao.md`.
-
-## Seguranca
-
-Se `CIDADAO_SMART_DRY_RUN=true`, o agente para no resumo e nao confirma uma solicitacao real.
-Para validar confirmacao e protocolo, rode em ambiente controlado e configure explicitamente `CIDADAO_SMART_DRY_RUN=false`.

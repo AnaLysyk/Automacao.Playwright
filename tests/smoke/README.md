@@ -1,32 +1,28 @@
-# Smoke Tests
+# [REGRESSAO] Smoke
 
 ## Objetivo
 
-Testes smoke validam se o básico do sistema está de pé rapidamente.
+Guardar testes rapidos que validam se o basico do sistema esta acessivel.
 
-## Características
+## Tipo de execucao
 
-- Rápidos
-- Automatizados
-- Sem CAPTCHA
-- Sem email real
-- Sem agenda instável
-- Devem rodar em CI
+Regressao automatica e candidata a CI.
 
-## Como usar
+## Comando principal
 
 ```bash
 npm run test:smoke
 ```
 
-## Recomendações
+## Pode entrar aqui
 
-- Use esta pasta para testes simples de layout e navegação
-- Não coloque fluxos longos aqui
-- Se precisar de dados, use fixtures/dados estáveis
+- Layout minimo.
+- Navegacao basica.
+- Health visual rapido.
 
-## Exemplo de nomes
+## Nao pode entrar aqui
 
-- `[SMOKE-HOME-001] Home carrega corretamente`
-- `[SMOKE-LOCAL-001] Tela de localização abre`
-- `[SMOKE-AGP-001] Link para agendamento está visível`
+- Fluxos longos.
+- CAPTCHA, e-mail manual ou SMART manual.
+- Teste dependente de agenda instavel.
+

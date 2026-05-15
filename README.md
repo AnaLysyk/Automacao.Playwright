@@ -4,6 +4,52 @@ Repositório de automação com **Playwright** para validação dos fluxos do **
 
 O objetivo é organizar uma base de QA executável, rastreável e segura, com testes **E2E**, **API**, **validações assistidas**, evidências visuais e documentação de apoio para análise de falhas, regressão funcional e acompanhamento técnico dos fluxos críticos da Griaule.
 
+## Navegacao rapida
+
+- Regras obrigatorias do repositorio: `AGENTS.md`
+- Indice de documentacao: `docs/INDICE_NAVEGACAO.md`
+- Guia de execucao: `docs/GUIA_DE_EXECUCAO.md`
+- Mapa de testes: `docs/MAPA_DE_TESTES.md`
+- Estrategia de captura e e-mail: `docs/ESTRATEGIA_CAPTURA_E_EMAIL.md`
+- Guia das pastas de teste: `tests/README.md`
+- Mapa do repositorio: `docs/MAPA_DO_REPOSITORIO.md`
+- Status atual da automacao: `docs/STATUS_ATUAL_AUTOMACAO.md`
+
+## Como saber o que rodar?
+
+Quero validar rapido se o projeto esta ok:
+
+```bash
+npm run typecheck
+npm run test:list
+```
+
+Quero rodar emissao online basica:
+
+```bash
+npx playwright test tests/emissao-online --project=chromium
+```
+
+Quero rodar 2a via expressa assistida:
+
+```bash
+npm run test:2via:expressa:encadeada
+```
+
+Quero abrir relatorio:
+
+```bash
+npm run report
+```
+
+Quero rodar tudo automatico:
+
+```bash
+npm run test:all
+```
+
+Fluxos assistidos nao devem ser considerados regressao automatica, porque dependem de CAPTCHA, codigo por e-mail ou acao manual do QA.
+
 ## Objetivo
 
 Transformar os fluxos críticos do Booking e do Cidadão Smart em uma base de automação clara, fácil de executar e preparada para evolução.
@@ -343,12 +389,14 @@ Esse comportamento deve ser registrado como warning, sem bloquear o E2E principa
 ## Referências do Projeto
 
 - Regras do agente: `AGENTS.md`
+- Indice de navegacao: `docs/INDICE_NAVEGACAO.md`
+- Mapa do repositorio: `docs/MAPA_DO_REPOSITORIO.md`
+- Status atual da automacao: `docs/STATUS_ATUAL_AUTOMACAO.md`
 - Guia de execução: `docs/GUIA_DE_EXECUCAO.md`
 - Evidências e relatórios: `docs/EVIDENCIAS_E_RELATORIOS.md`
 - Mapa de testes: `docs/MAPA_DE_TESTES.md`
 - Estratégia de automação: `docs/ESTRATEGIA_DE_AUTOMACAO.md`
-- Guia de análise de falhas: `docs/GUIA_DE_ANALISE_DE_FALHAS.md`
-- Relatório de auditoria da fundação: `docs/RELATORIO_DE_AUDITORIA_DA_FUNDACAO.md`
+- Documentos historicos: `docs/archive/raiz/`
 - Contextos funcionais: `context/requirements/`
 - Casos de teste: `context/test-cases/`
 

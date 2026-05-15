@@ -1,14 +1,29 @@
-# Booking Public
+# [REGRESSAO] Booking public
 
-Suites automaticas da area publica do Cidadao Smart / Booking.
+## Objetivo
 
-Objetivo: validar telas e comportamentos isolados do agendamento publico, usando massa controlada e configuracao por `.env.local`.
+Validar telas e comportamentos isolados do agendamento publico.
 
-Testes atuais:
+## Tipo de execucao
+
+Regressao automatica quando o ambiente estiver controlado e sem intervencao humana obrigatoria.
+
+## Comando principal
+
+```bash
+npm run test:booking:public
+```
+
+## Pode entrar aqui
 
 - `cidadao-smart-agendamento-presencial.spec.ts`
 - `cidadao-smart-agendamento-validacoes.spec.ts`
 - `cidadao-smart-agendamento-resumo.spec.ts`
 - `cidadao-smart-agendamento-autenticacao.spec.ts`
 
-Nao colocar aqui specs que dependam de intervencao humana obrigatoria. Fluxos com CAPTCHA real ou codigo de e-mail manual devem ficar em `tests/booking/manual-assisted/`.
+## Nao pode entrar aqui
+
+- Fluxo com CAPTCHA real.
+- Codigo de e-mail manual.
+- SMART manual.
+- 2a via expressa encadeada assistida.

@@ -1,58 +1,29 @@
-# API
+# [REGRESSAO] API
 
-Esta pasta contém validações de API, contratos, payloads e diagnósticos de integração do Booking / Cidadão Smart / SMART.
+## Objetivo
 
-Ela não deve conter fluxo visual de UI nem depender de CAPTCHA, e-mail ou intervenção manual.
+Validar APIs, contratos, payloads e diagnosticos de integracao.
 
-## Estrutura Esperada
+## Tipo de execucao
 
-```text
-tests/api/
-  booking/
-  cidadao-smart/
-  notifier/
-```
+Regressao automatica quando nao altera estado critico nem depende de massa instavel.
 
-## Responsabilidade
-
-- Validar status HTTP.
-- Validar estrutura de resposta.
-- Validar contrato de payload.
-- Validar regras de segurança, como não expor CPF em texto puro.
-- Apoiar diagnóstico de ambiente e integração.
-
-## Comandos
-
-Rodar todas as APIs:
+## Comando principal
 
 ```bash
 npm run test:api
 ```
 
-Rodar API Booking:
+## Pode entrar aqui
 
-```bash
-npm run test:api:booking
-```
+- Smoke de endpoint.
+- Contratos de payload.
+- Validacoes de seguranca.
+- Diagnosticos de Booking, Cidadao Smart, SMART e Notifier.
 
-Rodar API Cidadão Smart:
+## Nao pode entrar aqui
 
-```bash
-npm run test:api:cidadao-smart
-```
+- Fluxo visual de UI.
+- CAPTCHA, e-mail manual ou acao humana.
+- Tokens, senhas ou payloads reais sensiveis.
 
-Rodar Notifier:
-
-```bash
-npm run test:api:notifier
-```
-
-## Segurança
-
-Não versionar tokens, chaves, credenciais ou payloads reais sensíveis.
-
-Use `.env.local` para execução local e `.env.example` apenas como referência de variáveis.
-
-## Maturidade
-
-Testes de API devem ser candidatos naturais a CI, desde que não alterem estado crítico e não dependam de dados instáveis.
