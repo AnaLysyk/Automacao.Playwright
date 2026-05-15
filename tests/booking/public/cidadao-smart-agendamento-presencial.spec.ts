@@ -1,14 +1,14 @@
-import { test } from '../../fixtures';
-import { CidadaoSmartAgendamentoAutenticacaoPage } from '../../pages/CidadaoSmartAgendamentoAutenticacaoPage';
-import { CidadaoSmartAgendamentoConfirmacaoPage } from '../../pages/CidadaoSmartAgendamentoConfirmacaoPage';
-import { CidadaoSmartAgendamentoDataHoraPage } from '../../pages/CidadaoSmartAgendamentoDataHoraPage';
-import { CidadaoSmartAgendamentoLocalPage } from '../../pages/CidadaoSmartAgendamentoLocalPage';
-import { CidadaoSmartAgendamentoResumoPage } from '../../pages/CidadaoSmartAgendamentoResumoPage';
-import { cidadaoSmartTestData } from '../../support/data/cidadaoSmartTestData';
-import { getServicePointForTest } from '../../support/data/getServicePointForTest';
-import { obterCodigoSegurancaParaAutenticacao } from '../../support/email/obterCodigoSeguranca';
-import { prosseguirOuBloquearPorCaptcha } from '../../support/flows/cidadaoSmartFlows';
-import { salvarProtocoloGerado } from '../../support/reports/protocolos';
+import { test } from '@support/fixtures';
+import { CidadaoSmartAgendamentoAutenticacaoPage } from '@support/pages/CidadaoSmartAgendamentoAutenticacaoPage';
+import { CidadaoSmartAgendamentoConfirmacaoPage } from '@support/pages/CidadaoSmartAgendamentoConfirmacaoPage';
+import { CidadaoSmartAgendamentoDataHoraPage } from '@support/pages/CidadaoSmartAgendamentoDataHoraPage';
+import { CidadaoSmartAgendamentoLocalPage } from '@support/pages/CidadaoSmartAgendamentoLocalPage';
+import { CidadaoSmartAgendamentoResumoPage } from '@support/pages/CidadaoSmartAgendamentoResumoPage';
+import { cidadaoSmartTestData } from '@support/data/cidadaoSmartTestData';
+import { getServicePointForTest } from '@support/data/getServicePointForTest';
+import { obterCodigoSegurancaParaAutenticacao } from '@support/email/obterCodigoSeguranca';
+import { prosseguirOuBloquearPorCaptcha } from '@support/flows/cidadaoSmartFlows';
+import { salvarProtocoloGerado } from '@support/reports/protocolos';
 
 test.describe('Cidadao Smart - Agendamento presencial', () => {
   test('deve confirmar agendamento no posto selecionado com CPF valido', async ({ page }) => {

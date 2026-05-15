@@ -40,22 +40,42 @@ context/
 docs/
 
 tests/
-  agents/
-  config/
-  data/
-  types/
-  pages/
+  _support/
+    agents/
+    config/
+    data/
+    helpers/
+    pages/
+    providers/
+    reports/
+    types/
   booking/
     public/
-    e2e/
     manual-assisted/
-  booking-admin/
+      agendamento-presencial/
+    admin/
+      read-only/
+      write/
+  cidadao-smart/
+    emissao-online/
+      regressao/
+      manual-assisted/
+    segunda-via/
+      regressao/
+      manual-assisted/
+    consulta-pedido/
+  smart/
     read-only/
     write/
   api/
     booking/
     cidadao-smart/
     notifier/
+  e2e/
+    automated/
+    manual-assisted/
+  poc/
+    captura/
 
 legacy/
   automation-exercise/
@@ -202,7 +222,8 @@ Fluxos que dependem de CAPTCHA real devem ficar em:
 
 ```text
 tests/booking/manual-assisted/
-tests/manual-assisted/
+tests/cidadao-smart/segunda-via/manual-assisted/
+tests/e2e/manual-assisted/
 ```
 
 ## Captura com Câmera / Fake Video
@@ -324,12 +345,12 @@ Criar ou ajustar:
 - `tsconfig.json`;
 - `.gitignore`;
 - estrutura de pastas;
-- `tests/config/env.ts`;
-- `tests/config/knownIssues.ts`;
-- `tests/types/ExecutionContext.ts`;
-- `tests/data/bookingAgendamentoData.ts`;
-- `tests/agents/EvidenceAgent.ts`;
-- `tests/agents/StepAgent.ts`.
+- `tests/_support/config/env.ts`;
+- `tests/_support/config/knownIssues.ts`;
+- `tests/_support/types/ExecutionContext.ts`;
+- `tests/_support/data/bookingAgendamentoData.ts`;
+- `tests/_support/agents/EvidenceAgent.ts`;
+- `tests/_support/agents/StepAgent.ts`.
 
 Critério mínimo:
 
@@ -342,8 +363,8 @@ Critério mínimo:
 
 Criar:
 
-- `tests/agents/CaptchaAgent.ts`;
-- `tests/agents/EmailCodeAgent.ts`.
+- `tests/_support/agents/CaptchaAgent.ts`;
+- `tests/_support/agents/EmailCodeAgent.ts`.
 
 Responsabilidades:
 
@@ -354,8 +375,8 @@ Responsabilidades:
 
 Criar:
 
-- `tests/agents/BookingAgendamentoAssistidoAgent.ts`;
-- `tests/booking/manual-assisted/booking-agendamento-assistido.spec.ts`.
+- `tests/_support/agents/BookingAgendamentoAssistidoAgent.ts`;
+- `tests/booking/manual-assisted/agendamento-presencial/booking-agendamento-assistido.spec.ts`.
 
 Fluxo esperado:
 

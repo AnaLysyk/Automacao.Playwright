@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { SmartProcessAgent } from '../../agents/SmartProcessAgent';
+import { SmartProcessAgent } from '@support/agents/SmartProcessAgent';
 
 test.describe('@smart @write @manual-assisted', () => {
   test('finalizar no SMART o ultimo protocolo gerado pelo Booking', async ({ page }) => {

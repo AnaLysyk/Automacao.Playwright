@@ -5,9 +5,13 @@
     "moduleResolution": "NodeNext",
     "allowImportingTsExtensions": true,
     "types": ["node", "@playwright/test"],
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM"],
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "paths": {
+      "@support/*": ["./tests/_support/*"],
+      "@tests/*": ["./tests/*"]
+    },
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

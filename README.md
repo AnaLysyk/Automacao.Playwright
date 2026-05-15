@@ -14,6 +14,7 @@ O objetivo é organizar uma base de QA executável, rastreável e segura, com te
 - Guia das pastas de teste: `tests/README.md`
 - Mapa do repositorio: `docs/MAPA_DO_REPOSITORIO.md`
 - Status atual da automacao: `docs/STATUS_ATUAL_AUTOMACAO.md`
+- Catalogo da automacao: `docs/CATALOGO_AUTOMACAO.md`
 
 ## Como saber o que rodar?
 
@@ -27,7 +28,7 @@ npm run test:list
 Quero rodar emissao online basica:
 
 ```bash
-npx playwright test tests/emissao-online --project=chromium
+npx playwright test tests/cidadao-smart/emissao-online/regressao --project=chromium
 ```
 
 Quero rodar 2a via expressa assistida:
@@ -124,23 +125,41 @@ context/
 docs/
 
 tests/
-  agents/
-  config/
-  data/
-  types/
-  pages/
+  _support/
+    agents/
+    config/
+    data/
+    helpers/
+    pages/
+    providers/
+    reports/
+    types/
   booking/
     public/
-    e2e/
     manual-assisted/
-  booking-admin/
+      agendamento-presencial/
+    admin/
+      read-only/
+      write/
+  cidadao-smart/
+    emissao-online/
+      regressao/
+    segunda-via/
+      regressao/
+      manual-assisted/
+    consulta-pedido/
+  smart/
     read-only/
     write/
   api/
     booking/
     cidadao-smart/
     notifier/
-  manual-assisted/
+  e2e/
+    automated/
+    manual-assisted/
+  poc/
+    captura/
 
 legacy/
   automation-exercise/
@@ -169,7 +188,7 @@ Contém guias operacionais e documentos de apoio:
 - análise de falhas;
 - relatórios de auditoria e execução.
 
-### `tests/agents/`
+### `tests/_support/agents/`
 
 Contém agentes responsáveis por orquestrar fluxos, etapas, evidências e tratamento de falhas.
 
@@ -182,7 +201,7 @@ Exemplos:
 - `StepAgent`;
 - `FailureClassifierAgent`.
 
-### `tests/pages/`
+### `tests/_support/pages/`
 
 Contém Page Objects e seletores das telas automatizadas.
 
@@ -192,7 +211,7 @@ Page Object conhece tela. Agent orquestra fluxo. Spec deve ficar limpa.
 
 Contém testes da jornada pública do Booking consumida pelo Cidadão Smart.
 
-### `tests/booking-admin/`
+### `tests/booking/admin/`
 
 Contém validações do Painel Administrativo do Booking.
 
@@ -205,7 +224,7 @@ Separação esperada:
 
 Contém validações de API, contratos, payloads e diagnósticos de integração.
 
-### `tests/manual-assisted/`
+### `tests/e2e/manual-assisted/`
 
 Contém fluxos assistidos que exigem intervenção humana, como CAPTCHA real ou código de segurança enviado por e-mail.
 

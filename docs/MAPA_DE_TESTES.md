@@ -1,42 +1,52 @@
 # Mapa de Testes
 
-Este documento orienta qual suíte rodar para cada área do projeto Booking / Cidadão Smart / SMART.
+Este documento orienta qual suite rodar para cada area do projeto Booking / Cidadao Smart / SMART.
 
-## Mapa Principal
+## Mapa principal
 
-Área | Tipo | Caminho | Comando | CI
---- | --- | --- | --- | ---
-Booking público | UI | `tests/booking/public/` | `npm run test:booking:public` | Parcial
-Booking E2E | UI | `tests/booking/e2e/` | `npm run test:booking:e2e` | Controlado
-Booking assistido | Manual-assisted | `tests/booking/manual-assisted/` | `npm run test:booking:assistido` | Não
-Admin read-only | UI | `tests/booking-admin/read-only/` | `npm run test:admin:readonly` | Parcial
-Admin write | UI | `tests/booking-admin/write/` | `npm run test:admin:write` | Não sem ambiente controlado
-API Booking | API | `tests/api/booking/` | `npm run test:api:booking` | Sim
-API Cidadão Smart | API | `tests/api/cidadao-smart/` | `npm run test:api:cidadao-smart` | Sim
-API Notifier | API | `tests/api/notifier/` | `npm run test:api:notifier` | Sim
-Regressão geral | UI/API | `tests/agendamento-presencial/`, `tests/emissao-online/`, `tests/consulta/`, `tests/2via/`, `tests/api/` | `npm run test:all` | Parcial
+| Area | Tipo | Caminho | Comando | CI |
+|---|---|---|---|---|
+| Smoke | UI | `tests/smoke/` | `npm run test:smoke` | Sim |
+| Booking publico | UI | `tests/booking/public/` | `npm run test:booking:public` | Parcial |
+| Booking assistido | Manual-assisted | `tests/booking/manual-assisted/agendamento-presencial/` | `npm run test:booking:assistido` | Nao |
+| Admin read-only | UI | `tests/booking/admin/read-only/` | `npm run test:admin:readonly` | Parcial |
+| Admin write | UI | `tests/booking/admin/write/` | `npm run test:admin:write` | Nao sem ambiente controlado |
+| Emissao online | UI | `tests/cidadao-smart/emissao-online/regressao/` | `npm run test:emissao` | Parcial |
+| Consulta | UI | `tests/cidadao-smart/consulta-pedido/` | `npm run test:consulta` | Parcial |
+| Segunda via regressao | UI | `tests/cidadao-smart/segunda-via/regressao/` | `npm run test:2via` | Parcial |
+| Segunda via assistida | Manual-assisted | `tests/cidadao-smart/segunda-via/manual-assisted/` | `npm run test:2via:expressa:encadeada` | Nao |
+| API | API | `tests/api/` | `npm run test:api` | Parcial |
+| SMART read-only | UI | `tests/smart/read-only/` | `npx playwright test tests/smart/read-only --project=chromium` | Parcial |
+| SMART write | Manual-assisted/write | `tests/smart/write/` | `npm run test:smart:finalizar` | Nao |
+| E2E automatico | E2E | `tests/e2e/automated/` | `npm run test:e2e` | Controlado |
+| E2E assistido | Manual-assisted | `tests/e2e/manual-assisted/` | `npm run test:demo` | Nao |
+| POC captura | POC | `tests/poc/captura/` | `npm run test:captura:poc` | Nao |
 
-## Regras de Uso
+## Regras de uso
 
-- Fluxo com CAPTCHA real ou código por e-mail é `manual-assisted`.
-- Teste `manual-assisted` não deve rodar em CI.
-- Teste `write` só deve rodar em ambiente controlado.
-- Ambiente 201 deve priorizar validações read-only.
+- Fluxo com CAPTCHA real ou codigo por e-mail e `manual-assisted`.
+- Teste `manual-assisted` nao deve rodar em CI.
+- Teste `write` so deve rodar em ambiente controlado.
+- Ambiente 201 deve priorizar validacoes read-only.
 - Cada teste deve ser independente.
 
-## Quando Usar Cada Suíte
+## Quando usar cada suite
 
-- Para validar fluxo público do Booking: `tests/booking/public/`.
-- Para demonstrar jornada completa com intervenção humana: `tests/booking/manual-assisted/`.
-- Para investigar configuração administrativa: `tests/booking-admin/read-only/`.
-- Para alterar configuração administrativa: `tests/booking-admin/write/`, com aprovação e ambiente controlado.
-- Para diagnosticar integração: `tests/api/`.
+- Para validacao rapida: `npm run typecheck` e `npm run test:list`.
+- Para validar fluxo publico do Booking: `tests/booking/public/`.
+- Para demonstrar jornada completa com intervencao humana: `tests/booking/manual-assisted/agendamento-presencial/`.
+- Para validar emissao online: `tests/cidadao-smart/emissao-online/regressao/`.
+- Para validar segunda via expressa assistida: `tests/cidadao-smart/segunda-via/manual-assisted/`.
+- Para investigar configuracao administrativa: `tests/booking/admin/read-only/`.
+- Para alterar configuracao administrativa: `tests/booking/admin/write/`, com aprovacao e ambiente controlado.
+- Para diagnosticar integracao: `tests/api/`.
 
-## Manutenção
+## Manutencao
 
-Quando uma nova suíte for criada:
+Quando uma nova suite for criada:
 
 1. Adicionar script no `package.json`.
 2. Atualizar este mapa.
-3. Atualizar README da pasta, se existir.
-4. Garantir que a classificação entre automático, E2E e assistido esteja clara.
+3. Atualizar `docs/CATALOGO_AUTOMACAO.md`.
+4. Atualizar README da pasta, se existir.
+5. Garantir que a classificacao entre automatico, E2E, POC e assistido esteja clara.

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { ApiHelper } from '../../helpers/ApiHelper';
+import { ApiHelper } from '@support/helpers/ApiHelper';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });

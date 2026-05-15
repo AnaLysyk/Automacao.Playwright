@@ -1,9 +1,9 @@
-import { test } from '../../fixtures';
-import { CidadaoSmartAgendamentoDataHoraPage } from '../../pages/CidadaoSmartAgendamentoDataHoraPage';
-import { CidadaoSmartAgendamentoLocalPage } from '../../pages/CidadaoSmartAgendamentoLocalPage';
-import { CidadaoSmartAgendamentoResumoPage } from '../../pages/CidadaoSmartAgendamentoResumoPage';
-import { cidadaoSmartTestData } from '../../support/data/cidadaoSmartTestData';
-import { prosseguirOuBloquearPorCaptcha } from '../../support/flows/cidadaoSmartFlows';
+import { test } from '@support/fixtures';
+import { CidadaoSmartAgendamentoDataHoraPage } from '@support/pages/CidadaoSmartAgendamentoDataHoraPage';
+import { CidadaoSmartAgendamentoLocalPage } from '@support/pages/CidadaoSmartAgendamentoLocalPage';
+import { CidadaoSmartAgendamentoResumoPage } from '@support/pages/CidadaoSmartAgendamentoResumoPage';
+import { cidadaoSmartTestData } from '@support/data/cidadaoSmartTestData';
+import { prosseguirOuBloquearPorCaptcha } from '@support/flows/cidadaoSmartFlows';
 
 test.describe('Cidadao Smart - Resumo do agendamento', () => {
   test('deve exibir dados completos do resumo para Top Tower', async ({ page }) => {
