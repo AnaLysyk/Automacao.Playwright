@@ -8,6 +8,48 @@ dotenv.config({ path: '.env.local' });
  */
 export class ApiHelper {
   /**
+   * Remove barra final para montar rotas de API de forma previsivel.
+   */
+  static normalizeUrl(url: string): string {
+    return url.replace(/\/+$/, '');
+  }
+
+  /**
+   * Base da API documentada. API_BASE_URL tem prioridade; se nao existir,
+   * usamos a base do Cidadao Smart porque os endpoints ficam no mesmo host.
+   */
+  static getApiBaseUrl(): string {
+    return this.normalizeUrl(process.env.API_BASE_URL || process.env.CIDADAO_SMART_BASE_URL || '');
+  }
+
+  /**
+   * Monta uma URL absoluta a partir de uma rota como /api/v1/...
+   */
+  static buildApiUrl(path: string, baseUrl = this.getApiBaseUrl()): string {
+    const normalizedBaseUrl = this.normalizeUrl(baseUrl);
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+    return `${normalizedBaseUrl}${normalizedPath}`;
+  }
+
+  /**
+   * Usa API_TOKEN quando ja existe token pronto; caso contrario tenta Keycloak.
+   */
+  static async getConfiguredToken(request: APIRequestContext): Promise<string | undefined> {
+    const fixedToken = process.env.API_TOKEN || '';
+    if (fixedToken) return fixedToken;
+
+    const canUseKeycloak =
+      Boolean(process.env.KEYCLOAK_TOKEN_URL) &&
+      Boolean(process.env.KEYCLOAK_CLIENT_ID) &&
+      Boolean(process.env.KEYCLOAK_CLIENT_SECRET);
+
+    if (!canUseKeycloak) return undefined;
+
+    return this.getAuthToken(request);
+  }
+
+  /**
    * Obter token de autenticação (Keycloak)
    */
   static async getAuthToken(
@@ -24,7 +66,10 @@ export class ApiHelper {
     }
 
     const response = await request.post(tokenUrl, {
-      data: {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      form: {
         grant_type: 'client_credentials',
         client_id: clientId,
         client_secret: clientSecret,
@@ -46,11 +91,15 @@ export class ApiHelper {
    */
   static getDefaultHeaders(): Record<string, string> {
     const cpf = process.env.X_OPERATOR_CPF || '';
-
-    return {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'x-operator-cpf': cpf,
     };
+
+    if (cpf) {
+      headers['x-operator-cpf'] = cpf;
+    }
+
+    return headers;
   }
 
   /**
