@@ -7,9 +7,13 @@
     "test": "playwright test",
     "test:list": "playwright test --list",
     "test:booking:assistido": "playwright test tests/booking/agendamento-presencial/agendamento-presencial.spec.ts --headed --project=chromium",
-    "test:booking": "playwright test tests/booking --headed --project=chromium",
-    "test:cidadao": "playwright test tests/cidadao-smart --headed --project=chromium",
+    "test:booking:ui": "playwright test tests/booking --headed --project=chromium",
+    "test:cidadao:ui": "playwright test tests/cidadao-smart --headed --project=chromium",
+    "test:booking": "playwright test tests/api/booking/agendamento.spec.ts --project=chromium",
+    "test:cidadao": "playwright test tests/api/cidadao-smart/via-expressa.spec.ts --project=chromium",
     "test:api": "playwright test tests/api --project=chromium",
+    "booking:agendamento": "playwright test tests/api/booking/agendamento.spec.ts --project=chromium",
+    "cidadao:via-expressa": "playwright test tests/api/cidadao-smart/via-expressa.spec.ts --project=chromium",
     "report": "playwright show-report"
   },
   "devDependencies": {

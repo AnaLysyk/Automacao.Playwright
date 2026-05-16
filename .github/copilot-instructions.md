@@ -5,12 +5,15 @@ Este projeto automatiza somente Cidadao Smart e Booking com Playwright e TypeScr
 Regras:
 
 - Manter testes em `tests/booking/agendamento-presencial/`, `tests/cidadao-smart/emissao-online/`, `tests/cidadao-smart/consulta-pedido/` ou `tests/api/`.
+- Priorizar fluxos criticos de API em `tests/api/` para CI/CD.
+- Cada teste deve ter risco e diagnostico claros: criacao, consulta, cancelamento, protocolo, status, persistencia ou integracao.
+- Nao criar teste so porque a tela existe.
 - Manter locators apenas em `*.elements.ts`.
 - Manter acoes e validacoes reutilizaveis apenas em `*.flow.ts`.
 - Manter massa apenas em `*.data.ts`.
 - Specs devem chamar flows e nao devem conter locators.
 - Apoio compartilhado fica em `support/`.
-- APIs sao apoio, nao substituem fluxo E2E.
+- UI fica para bypass oficial ou execucao assistida quando houver CAPTCHA, Captury ou e-mail.
 - Nao criar `prompts/`, `context/`, arquitetura paralela ou documentacao longa.
 - Nao criar automacao para Identity, dashboard generico, login generico ou SMART operador.
 - Nao burlar Captury/reCAPTCHA; usar helper em `support/captcha/captcha.helper.ts`.

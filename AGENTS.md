@@ -1,40 +1,59 @@
 # AGENTS.md
 
-Este repositório automatiza somente Cidadão Smart e Booking / Agendamento com Playwright e TypeScript.
+Este repositorio automatiza somente Cidadao Smart e Booking / Agendamento com Playwright e TypeScript.
+
+## Estrategia Atual
+
+- Priorizar fluxos criticos de API para CI/CD.
+- UI fica para validacao realmente necessaria, bypass oficial ou execucao assistida.
+- Cada teste deve cobrir risco claro: criacao, consulta, cancelamento, protocolo, status, persistencia ou integracao.
+- Nao criar teste so porque a tela existe.
 
 ## Escopo
 
-- Manter testes principais em `tests/booking/agendamento-presencial/`, `tests/cidadao-smart/emissao-online/`, `tests/cidadao-smart/consulta-pedido/` e `tests/api/`.
-- Manter apoio compartilhado em `support/`.
-- Usar APIs apenas como apoio de massa, consulta, status e validação.
-- Não criar automação de Identity, dashboard genérico, login genérico ou SMART operador.
+- Booking: agendamento critico, consulta e cancelamento.
+- Cidadao Smart: via expressa, protocolo, status e persistencia.
+- Smart: apoio para validar processo/protocolo quando necessario.
+- Nao criar automacao de Identity, dashboard generico, login generico ou SMART operador.
 
-## Padrão por Tela
+## Organizacao
 
-Cada tela deve ter, quando aplicável:
+- Fluxos criticos de CI ficam em `tests/api/`.
+- Fluxos de UI continuam por tela em `tests/booking/` e `tests/cidadao-smart/`.
+- Apoio compartilhado fica em `support/`.
+- Clients de API ficam em `support/api/`.
+- Diagnosticos tecnicos ficam em `support/utils/diagnostico.ts`.
+
+## Padrao por Tela
+
+Quando houver UI:
 
 - `*.elements.ts`: somente locators.
-- `*.flow.ts`: somente ações e validações reutilizáveis da tela.
+- `*.flow.ts`: somente acoes e validacoes reutilizaveis da tela.
 - `*.data.ts`: somente massa da tela.
 - `*.spec.ts`: testes limpos chamando flows.
 
-Locators não devem ficar em specs. Fluxos não devem ficar em elements.
+Locators nao devem ficar em specs. Fluxos nao devem ficar em elements.
 
-## Segurança
+## Seguranca
 
-- Não versionar `.env.local`, tokens, senhas, códigos reais, credenciais, evidências ou dados sensíveis.
-- CAPTCHA/Captury real não deve ser burlado.
+- Nao versionar `.env.local`, tokens, senhas, codigos reais, credenciais, evidencias ou dados sensiveis.
+- CAPTCHA/Captury real nao deve ser burlado.
 - E-mail deve passar por `support/email/email.client.ts`.
 - CAPTCHA/Captury deve passar por `support/captcha/captcha.helper.ts`.
 
-## Execução
+## Execucao
 
 ```bash
 npm install
 npx playwright install
+npm run typecheck
 npm run test:list
-npx playwright test tests/cidadao-smart
-npx playwright test tests/booking
+npm run test:api
+npm run test:booking
+npm run test:cidadao
+npm run booking:agendamento
+npm run cidadao:via-expressa
 ```
 
-Se uma execução depender de VPN, e-mail, Captury/CAPTCHA ou massa específica, registrar como pendência técnica em vez de mascarar o erro.
+Se uma execucao depender de VPN, e-mail, Captury/CAPTCHA ou massa especifica, registrar como pendencia tecnica em vez de mascarar o erro.

@@ -19,6 +19,7 @@ export type EnvConfig = {
   testEmail: string;
   testEmailPassword: string;
   testEmailProvider: string;
+  testPhone: string;
   emailCodeMode: EmailCodeMode;
   emailBrowserProfileDir: string;
   emailBrowserSearchQuery: string;
@@ -26,6 +27,23 @@ export type EnvConfig = {
   cpfElegivel: string;
   cpfSemHistorico: string;
   cpfInvalido: string;
+  cpfRequerenteBooking: string;
+  cpfComProcessoFinalizado: string;
+  servicePointId: string;
+  serviceId: string;
+  bookingDate: string;
+  bookingTime: string;
+  bookingCreateAppointmentPath: string;
+  bookingGetAppointmentPath: string;
+  bookingCancelAppointmentPath: string;
+  bookingCancelAppointmentMethod: string;
+  smartFinishedProcessByCpfPath: string;
+  smartGetProtocolPath: string;
+  cidadaoSmartExpressEligibilityPath: string;
+  cidadaoSmartCreateExpressPath: string;
+  cidadaoSmartGetProcessPath: string;
+  cidadaoSmartCancelExpressPath: string;
+  cidadaoSmartCancelExpressMethod: string;
   captchaMode: CaptchaMode;
   captureMode: CaptureMode;
   validPhotoPath: string;
@@ -48,29 +66,51 @@ function normalizeUrl(value: string): string {
   return value.replace(/\/+$/, '');
 }
 
+function read(name: string, fallback = ''): string {
+  return process.env[name] || fallback;
+}
+
 export function loadEnv(): EnvConfig {
   return {
-    cidadaoSmartBaseUrl: normalizeUrl(process.env.CIDADAO_SMART_BASE_URL || ''),
-    bookingBaseUrl: normalizeUrl(process.env.BOOKING_BASE_URL || process.env.CIDADAO_SMART_BASE_URL || ''),
-    smartApiBaseUrl: normalizeUrl(process.env.SMART_API_BASE_URL || ''),
-    cidadaoSmartApiBaseUrl: normalizeUrl(process.env.CIDADAO_SMART_API_BASE_URL || ''),
-    bookingApiBaseUrl: normalizeUrl(process.env.BOOKING_API_BASE_URL || ''),
-    smartApiToken: process.env.SMART_API_TOKEN || '',
-    cidadaoSmartApiToken: process.env.CIDADAO_SMART_API_TOKEN || '',
-    bookingApiToken: process.env.BOOKING_API_TOKEN || '',
-    testEmail: process.env.TEST_EMAIL || '',
-    testEmailPassword: process.env.TEST_EMAIL_PASSWORD || '',
-    testEmailProvider: process.env.TEST_EMAIL_PROVIDER || '',
+    cidadaoSmartBaseUrl: normalizeUrl(read('CIDADAO_SMART_BASE_URL')),
+    bookingBaseUrl: normalizeUrl(read('BOOKING_BASE_URL', read('CIDADAO_SMART_BASE_URL'))),
+    smartApiBaseUrl: normalizeUrl(read('SMART_API_BASE_URL')),
+    cidadaoSmartApiBaseUrl: normalizeUrl(read('CIDADAO_SMART_API_BASE_URL')),
+    bookingApiBaseUrl: normalizeUrl(read('BOOKING_API_BASE_URL')),
+    smartApiToken: read('SMART_API_TOKEN'),
+    cidadaoSmartApiToken: read('CIDADAO_SMART_API_TOKEN'),
+    bookingApiToken: read('BOOKING_API_TOKEN'),
+    testEmail: read('TEST_EMAIL'),
+    testEmailPassword: read('TEST_EMAIL_PASSWORD'),
+    testEmailProvider: read('TEST_EMAIL_PROVIDER'),
+    testPhone: read('TEST_PHONE', read('CIDADAO_SMART_TEST_PHONE')),
     emailCodeMode: readEnum('EMAIL_CODE_MODE', ['manual', 'env', 'browser', 'gmail-api', 'imap', 'internal-api', 'log'], 'manual'),
-    emailBrowserProfileDir: process.env.EMAIL_BROWSER_PROFILE_DIR || 'playwright/.profiles/email',
-    emailBrowserSearchQuery: process.env.EMAIL_BROWSER_SEARCH_QUERY || 'codigo OR código',
-    securityCode: process.env.CIDADAO_SMART_SECURITY_CODE || '',
-    cpfElegivel: process.env.CPF_ELEGIVEL || '',
-    cpfSemHistorico: process.env.CPF_SEM_HISTORICO || '',
-    cpfInvalido: process.env.CPF_INVALIDO || '00000000000',
+    emailBrowserProfileDir: read('EMAIL_BROWSER_PROFILE_DIR', 'playwright/.profiles/email'),
+    emailBrowserSearchQuery: read('EMAIL_BROWSER_SEARCH_QUERY', 'codigo OR codigo'),
+    securityCode: read('CIDADAO_SMART_SECURITY_CODE'),
+    cpfElegivel: read('CPF_ELEGIVEL'),
+    cpfSemHistorico: read('CPF_SEM_HISTORICO'),
+    cpfInvalido: read('CPF_INVALIDO', '00000000000'),
+    cpfRequerenteBooking: read('CPF_REQUERENTE_BOOKING', read('CPF_ELEGIVEL')),
+    cpfComProcessoFinalizado: read('CPF_COM_PROCESSO_FINALIZADO'),
+    servicePointId: read('SERVICE_POINT_ID', read('CIDADAO_SMART_DEFAULT_SERVICE_POINT')),
+    serviceId: read('SERVICE_ID'),
+    bookingDate: read('BOOKING_DATE', read('CIDADAO_SMART_TEST_APPOINTMENT_DATE')),
+    bookingTime: read('BOOKING_TIME', read('CIDADAO_SMART_TEST_APPOINTMENT_TIME')),
+    bookingCreateAppointmentPath: read('BOOKING_CREATE_APPOINTMENT_PATH'),
+    bookingGetAppointmentPath: read('BOOKING_GET_APPOINTMENT_PATH'),
+    bookingCancelAppointmentPath: read('BOOKING_CANCEL_APPOINTMENT_PATH'),
+    bookingCancelAppointmentMethod: read('BOOKING_CANCEL_APPOINTMENT_METHOD', 'POST'),
+    smartFinishedProcessByCpfPath: read('SMART_FINISHED_PROCESS_BY_CPF_PATH'),
+    smartGetProtocolPath: read('SMART_GET_PROTOCOL_PATH', '/protocolos/{protocolo}'),
+    cidadaoSmartExpressEligibilityPath: read('CIDADAO_SMART_EXPRESS_ELIGIBILITY_PATH'),
+    cidadaoSmartCreateExpressPath: read('CIDADAO_SMART_CREATE_EXPRESS_PATH'),
+    cidadaoSmartGetProcessPath: read('CIDADAO_SMART_GET_PROCESS_PATH'),
+    cidadaoSmartCancelExpressPath: read('CIDADAO_SMART_CANCEL_EXPRESS_PATH'),
+    cidadaoSmartCancelExpressMethod: read('CIDADAO_SMART_CANCEL_EXPRESS_METHOD', 'POST'),
     captchaMode: readEnum('CAPTCHA_MODE', ['manual', 'disabled', 'test'], 'manual'),
     captureMode: readEnum('CAPTURE_MODE', ['manual', 'fake-video', 'disabled'], 'manual'),
-    validPhotoPath: process.env.CIDADAO_SMART_VALID_PHOTO_PATH || '',
+    validPhotoPath: read('CIDADAO_SMART_VALID_PHOTO_PATH'),
     headless: readBoolean('HEADLESS', true),
   };
 }

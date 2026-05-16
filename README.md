@@ -1,21 +1,24 @@
 # Automacao Playwright - Cidadao Smart e Booking
 
-Projeto de testes E2E Playwright para fluxos reais do Cidadao Smart e do Booking / Agendamento.
+Projeto de testes Playwright para fluxos criticos do Cidadao Smart e do Booking / Agendamento.
+
+A estrategia atual e API-first e CI/CD-first: validar rapidamente criacao, consulta, cancelamento, protocolo, status e persistencia. A UI continua no projeto, mas fica reservada para fluxos realmente necessarios, bypass oficial ou execucao assistida.
 
 ## Sistemas cobertos
 
 - Cidadao Smart
 - Booking / Agendamento
-- APIs auxiliares do Smart, Cidadao Smart e Booking apenas como apoio de massa, consulta e validacao
+- APIs auxiliares do Smart, Cidadao Smart e Booking
 
 ## Estrutura
 
 ```txt
 tests/
+  api/booking/
+  api/cidadao-smart/
   booking/agendamento-presencial/
   cidadao-smart/emissao-online/
   cidadao-smart/consulta-pedido/
-  api/
 support/
   api/
   captcha/
@@ -29,7 +32,7 @@ docs/
   KNOWN_ISSUES.md
 ```
 
-Cada fluxo principal fica em uma pasta propria com `*.elements.ts`, `*.flow.ts`, `*.data.ts` e `*.spec.ts`.
+Fluxos de UI continuam por tela com `*.elements.ts`, `*.flow.ts`, `*.data.ts` e `*.spec.ts`. Fluxos criticos de CI ficam em `tests/api/`.
 
 ## Configuracao
 
@@ -42,12 +45,30 @@ npx playwright install
 
 ## Execucao
 
+Fluxos criticos de API:
+
 ```bash
-npm run test:booking:assistido
 npm run test:booking
 npm run test:cidadao
+npm run booking:agendamento
+npm run cidadao:via-expressa
 npm run test:api
+```
+
+Validacoes recomendadas para CI/CD:
+
+```bash
+npm run typecheck
 npm run test:list
+npm run test:api
+```
+
+Fluxos assistidos ou por tela:
+
+```bash
+npm run test:booking:assistido
+npm run test:booking:ui
+npm run test:cidadao:ui
 ```
 
 Fluxos com CAPTCHA, Captury, e-mail ou VPN dependem de ambiente controlado ou passo manual assistido.
@@ -56,7 +77,7 @@ Fluxos com CAPTCHA, Captury, e-mail ou VPN dependem de ambiente controlado ou pa
 
 As regras para Copilot/Agent ficam em `.github/copilot-instructions.md` e `.github/agents/`.
 
-Para e-mail local assistido, use `EMAIL_CODE_MODE=browser` e faça login uma vez em um perfil separado:
+Para e-mail local assistido, use `EMAIL_CODE_MODE=browser` e faca login uma vez em um perfil separado:
 
 ```bash
 npx playwright codegen --user-data-dir=./playwright/.profiles/email https://mail.google.com

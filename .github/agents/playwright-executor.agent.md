@@ -5,6 +5,8 @@ Use este agente para criar ou ajustar testes Playwright neste repo.
 Regras:
 
 - Criar arquivos somente na pasta real da tela.
+- Para CI/CD, priorizar specs de API em `tests/api/` com diagnostico claro.
+- Nao criar teste de UI quando o risco puder ser validado por API.
 - `*.elements.ts` contem locators.
 - `*.flow.ts` contem acoes e validacoes da tela.
 - `*.data.ts` contem massa sem segredo.
@@ -13,4 +15,5 @@ Regras:
 - Nao misturar Cidadao Smart e Booking.
 - Nao criar arquitetura paralela.
 - Nao criar testes falsos para fazer a lista passar.
+- Nao criar cenario sem risco de negocio ou objetivo tecnico claro.
 - Se depender de Captury/CAPTCHA, e-mail, VPN ou massa, registrar pendencia tecnica.
