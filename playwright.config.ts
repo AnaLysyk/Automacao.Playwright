@@ -7,12 +7,39 @@ dotenv.config();
 
 const headless = (process.env.HEADLESS || 'true').trim().toLowerCase() !== 'false';
 const slowMo = Number(process.env.PW_SLOW_MO || 0);
+
 const captureMode = process.env.CAPTURE_MODE || 'manual';
 const fakeVideoPath = process.env.CAMERA_FAKE_VIDEO_PATH || '';
+const cliArgs = process.argv.slice(2).join(' ');
+
+const sistemaInferido = cliArgs.includes('tests/api/booking') ? 'Booking' : 'Cidadao Smart';
+const fluxoInferido = cliArgs.includes('tests/api/booking/agendamento')
+  ? 'Agendamento'
+  : 'Via Expressa';
+
+const runType = process.env.QA_RUN_TYPE || 'CICD';
+const systemUnderTest = process.env.QA_SYSTEM || sistemaInferido;
+const testFlow = process.env.QA_FLOW || fluxoInferido;
+const testEnvironment =
+  process.env.QA_ENV ||
+  process.env.BOOKING_API_BASE_URL ||
+  process.env.CIDADAO_SMART_BASE_URL ||
+  process.env.BOOKING_BASE_URL ||
+  'nao informado';
+
+const executor =
+  process.env.QA_EXECUTOR ||
+  process.env.USERNAME ||
+  process.env.USER ||
+  'nao informado';
+
 const baseURL =
   process.env.CIDADAO_SMART_BASE_URL ||
   process.env.BOOKING_BASE_URL ||
+  process.env.BOOKING_API_BASE_URL ||
   'http://localhost';
+
+const executandoFluxoAssistido = cliArgs.includes('fluxos-assistidos');
 
 const chromiumArgs =
   captureMode === 'fake-video' && fakeVideoPath
@@ -24,33 +51,62 @@ const chromiumArgs =
     : [];
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: '.',
+
+  testMatch: ['tests/**/*.spec.ts'],
+
+  testIgnore: [
+    '**/_arquivo-morto/**',
+    '**/diagnostics/**',
+    '**/node_modules/**',
+    '**/test-results/**',
+    '**/playwright-report/**',
+  ],
+
   outputDir: 'test-results',
+
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI || executandoFluxoAssistido ? 1 : undefined,
+
   timeout: 120_000,
+
   expect: {
     timeout: 30_000,
   },
+
+  metadata: {
+    tipoExecucao: runType,
+    sistema: systemUnderTest,
+    fluxo: testFlow,
+    ambiente: testEnvironment,
+    executor,
+  },
+
   reporter: [
-    ['list'],
-    ['html', { open: 'never' }],
+    ['./support/reporters/cicd-console-reporter.ts'],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['json', { outputFile: 'test-results/cicd-results.json' }],
   ],
+
   use: {
     baseURL,
     headless,
     ignoreHTTPSErrors: true,
-    trace: 'on-first-retry',
+
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+
     permissions: captureMode === 'fake-video' ? ['camera', 'microphone'] : [],
+
     launchOptions: {
       slowMo: Number.isFinite(slowMo) ? slowMo : 0,
       args: chromiumArgs,
     },
   },
+
   projects: [
     {
       name: 'chromium',

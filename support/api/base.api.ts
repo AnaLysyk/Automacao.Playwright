@@ -13,6 +13,8 @@ export type ApiResult<T = unknown> = {
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+type ExtraHeaders = Record<string, string>;
+
 export class BaseApiClient {
   constructor(private readonly options: ApiClientOptions) {}
 
@@ -23,48 +25,60 @@ export class BaseApiClient {
     }, path);
   }
 
-  protected get<T>(path: string): Promise<ApiResult<T>> {
-    return this.request<T>('GET', path);
+  protected get<T>(path: string, headers: ExtraHeaders = {}): Promise<ApiResult<T>> {
+    return this.request<T>('GET', path, undefined, headers);
   }
 
-  protected post<T>(path: string, body?: unknown): Promise<ApiResult<T>> {
-    return this.request<T>('POST', path, body);
+  protected post<T>(path: string, body?: unknown, headers: ExtraHeaders = {}): Promise<ApiResult<T>> {
+    return this.request<T>('POST', path, body, headers);
   }
 
-  protected put<T>(path: string, body?: unknown): Promise<ApiResult<T>> {
-    return this.request<T>('PUT', path, body);
+  protected put<T>(path: string, body?: unknown, headers: ExtraHeaders = {}): Promise<ApiResult<T>> {
+    return this.request<T>('PUT', path, body, headers);
   }
 
-  protected patch<T>(path: string, body?: unknown): Promise<ApiResult<T>> {
-    return this.request<T>('PATCH', path, body);
+  protected patch<T>(path: string, body?: unknown, headers: ExtraHeaders = {}): Promise<ApiResult<T>> {
+    return this.request<T>('PATCH', path, body, headers);
   }
 
-  protected delete<T>(path: string, body?: unknown): Promise<ApiResult<T>> {
-    return this.request<T>('DELETE', path, body);
+  protected delete<T>(path: string, body?: unknown, headers: ExtraHeaders = {}): Promise<ApiResult<T>> {
+    return this.request<T>('DELETE', path, body, headers);
   }
 
-  protected requestByMethod<T>(method: string, path: string, body?: unknown): Promise<ApiResult<T>> {
+  protected requestByMethod<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    headers: ExtraHeaders = {},
+  ): Promise<ApiResult<T>> {
     const normalizedMethod = method.trim().toUpperCase() as HttpMethod;
 
     if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(normalizedMethod)) {
       throw new Error(`API_METHOD_UNSUPPORTED: ${method}`);
     }
 
-    return this.request<T>(normalizedMethod, path, body);
+    return this.request<T>(normalizedMethod, path, body, headers);
   }
 
-  private async request<T>(method: HttpMethod, path: string, body?: unknown): Promise<ApiResult<T>> {
+  private async request<T>(
+    method: HttpMethod,
+    path: string,
+    body?: unknown,
+    extraHeaders: ExtraHeaders = {},
+  ): Promise<ApiResult<T>> {
     if (!this.options.baseUrl) {
       throw new Error('API_BASE_URL_NAO_CONFIGURADA');
     }
 
     const url = `${this.options.baseUrl}${path}`;
+
     const response = await fetch(url, {
       method,
       headers: {
         accept: 'application/json',
         ...(body === undefined ? {} : { 'content-type': 'application/json' }),
         ...(this.options.token ? { authorization: `Bearer ${this.options.token}` } : {}),
+        ...extraHeaders,
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     });

@@ -1,28 +1,26 @@
-# Execucao
 
-Instalacao:
+## Mas precisa adicionar isso no `package.json`
 
-```bash
-npm install
-npx playwright install
-```
+Para esse texto ficar verdadeiro, o Code precisa criar os scripts:
 
-Comandos criticos de API:
+```json
+{
+  "scripts": {
+    "test": "playwright test",
+    "test:list": "playwright test --list",
+    "typecheck": "tsc --noEmit",
 
-```bash
-npm run test:booking
-npm run test:cidadao
-npm run booking:agendamento
-npm run cidadao:via-expressa
-npm run test:api
-```
+    "test:api": "playwright test tests/api --reporter=list",
+    "test:booking": "playwright test tests/api/booking --reporter=list",
+    "test:cidadao": "playwright test tests/api/cidadao-smart --reporter=list",
 
-Validacoes para CI/CD:
+    "booking:agendamento": "playwright test tests/api/booking/agendamento/agendamento.spec.ts --reporter=list",
+    "cidadao:via-expressa": "playwright test tests/api/cidadao-smart/via-expressa/via-expressa.spec.ts --reporter=list",
 
-```bash
-npm run typecheck
-npm run test:list
-npm run test:api
-```
+    "test:cidadao:ui": "playwright test tests/fluxos-assistidos/cidadao-smart --headed --project=chromium",
+    "cidadao:via-expressa:assistido": "playwright test tests/fluxos-assistidos/cidadao-smart/emissao-expressa/fluxo-assistido --headed --project=chromium",
+    "test:booking:assistido": "playwright test tests/fluxos-assistidos/booking/agendamento-presencial --headed --project=chromium",
 
-`test:booking:assistido` abre navegador e pode exigir CAPTCHA, e-mail, VPN e massa de teste. Esse fluxo e manual-assisted, nao smoke de CI.
+    "report": "playwright show-report"
+  }
+}
